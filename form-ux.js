@@ -52,8 +52,8 @@ function syncAccountUI(f,employeeChanged=false){
  const scopeBox=f.querySelector('fieldset'),summary=f.querySelector('[data-account-company]');
  const roleHelp=f.querySelector('[data-account-role-help]');if(roleHelp)roleHelp.textContent=({employee:L('查看本人資料與申請。','Access own information and requests.','មើលព័ត៌មាន និងសំណើផ្ទាល់ខ្លួន។'),hr:L('管理授權公司的人事資料，不含他人薪資。','Manage authorized HR files, excluding others’ pay.','គ្រប់គ្រងព័ត៌មាន HR ដែលបានអនុញ្ញាត មិនរួមប្រាក់ខែអ្នកផ្សេង។'),finance:L('查看授權公司的薪資與收付款資料。','View payroll and finance for authorized companies.','មើលប្រាក់ខែ និងហិរញ្ញវត្ថុរបស់ក្រុមហ៊ុនដែលបានអនុញ្ញាត។'),manager:L('查看授權公司的員工基本資料與業務。','Access employee basics and authorized business records.','មើលព័ត៌មានមូលដ្ឋានបុគ្គលិក និងអាជីវកម្មដែលបានអនុញ្ញាត។'),executive:L('依職務顯示 CEO／董事長總覽，可查看授權公司的員工基本資料；不含他人薪資與證件。','CEO/chairman dashboard and authorized employee basics; excludes others’ pay and identity documents.','ទិដ្ឋភាព CEO/ប្រធានក្រុមប្រឹក្សា និងព័ត៌មានមូលដ្ឋានបុគ្គលិក។ មិនរួមប្រាក់ខែ និងឯកសារផ្ទាល់ខ្លួនអ្នកផ្សេង។')})[f.elements.role.value]||'';
  if(employeeChanged)for(const el of f.querySelectorAll('[name=scopes]'))el.checked=false;
- scopeBox.hidden=ordinary;summary.hidden=!ordinary;
- summary.textContent=p?`${t('員工任職公司')} · ${companyName(p.companyCode)} — ${t('只開通本人任職公司。')}`:t('選定員工後自動帶入任職公司。');
+ scopeBox.hidden=false;summary.hidden=!ordinary;
+ summary.textContent=p?`${t('員工任職公司')} · ${companyName(p.companyCode)} — ${L('任職公司保留，支援公司可另外勾選。','Employer access is retained; select additional work companies as needed.','រក្សាសិទ្ធិក្រុមហ៊ុននិយោជក ហើយជ្រើសក្រុមហ៊ុនការងារបន្ថែម។')}`:t('選定員工後自動帶入任職公司。');
 }
 function syncProgressUI(f,changed){
  if(f.dataset.kind!=='engineering_work')return;
