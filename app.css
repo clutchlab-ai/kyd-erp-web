@@ -54,3 +54,16 @@
 .staff-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,310px),1fr));gap:16px}.staff-item{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid var(--line,#e3e8ee)}.staff-item:last-child{border-bottom:0}.staff-card small{display:block;margin-top:4px}.staff-card .button-row{flex-wrap:wrap}.staff-meta{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.staff-month{max-width:180px}.staff-note{line-height:1.7}.staff-card h3{margin:0 0 8px}.staff-grid .card{min-width:0}.staff-history{max-height:260px;overflow:auto}@media(max-width:600px){.staff-card .button-row button{flex:1}.staff-item>div{width:100%}}
 /* Administrative task execution */
 .task-flow{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.task-flow span{padding:8px 10px;border:1px solid var(--line,#dce3eb);border-radius:8px}.task-checks{list-style:none;padding:0;margin:0}.task-checks li{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--line,#dce3eb)}.task-checks li>span{font-size:22px}.task-milestone{border:1px solid var(--line,#dce3eb);border-radius:10px;padding:12px;display:grid;gap:10px;margin-bottom:10px}@media(max-width:650px){.task-flow span{font-size:12px}.task-milestone{width:100%}}
+
+/* Embedded module retains the actual account, company and language controls. */
+html.kyd-embedded,html.kyd-embedded body{min-height:0;background:var(--bg)}
+.kyd-embedded .layout{display:block;min-height:0}
+.kyd-embedded .layout>.sidebar,.kyd-embedded .mobile-module-nav{display:none!important}
+.kyd-embedded .content{max-width:none;padding:24px 24px 38px}
+.kyd-embedded .topbar{height:auto;min-height:70px;padding:14px 24px;flex-wrap:wrap}
+.kyd-embedded .topbar .left,.kyd-embedded .topbar .right{min-width:0;flex-wrap:wrap}
+.kyd-embedded .topbar .account-chip{display:flex;max-width:100%;overflow-wrap:anywhere}
+.kyd-embedded .account-chip>div:last-child{display:block}
+.kyd-embedded .topbar select{max-width:260px}
+.kyd-embedded .login{margin:25px auto}
+@media(max-width:760px){.kyd-embedded .content{padding:20px 14px 30px}.kyd-embedded .topbar{padding:12px 14px;gap:12px}.kyd-embedded .topbar .left,.kyd-embedded .topbar .right{width:100%;justify-content:space-between}.kyd-embedded .topbar .left #company{flex:1;max-width:100%;min-width:0}.kyd-embedded .topbar .small-label{display:block}.kyd-embedded .topbar .account-chip{border-left:0;padding-left:0;font-size:11px;flex:1}.kyd-embedded .topbar .avatar{display:none}.kyd-embedded .topbar #language{max-width:125px}.kyd-embedded .topbar .mobile-brand{display:none}}

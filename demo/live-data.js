@@ -8,6 +8,7 @@
  const API='https://mfbgmzvrxuzkrurpttki.supabase.co/functions/v1/erp-workspace-api/';
  const SESSION_KEY='kyd_erp_workspace_github_session_v1';
  const FORMAL='https://clutchlab-ai.github.io/kyd-erp-web/';
+ const LIVE_MODULES=new Set(['home','people','attendance','personal','performance','payroll','documents','changes','training','projects','applications','settings','finance','procurement','pms','engineering','customers','vendors','files','approvals','overview','my-payroll']);
  const KEYS=['id','employeeNumber','companyCode','displayName','nativeName','englishName','department','position','status','joined','resigned','managerId','serviceProjects','revision','sourceType','sourceSheet','sourceRow'];
  let token='',generation=0,enabled=false,busy=false,manuallyHidden=false;
  let data={status:'disconnected',session:null,people:[],company:'',query:'',employment:'',error:'',updatedAt:null};
@@ -43,7 +44,8 @@
  }
  function sessionView(value){
   if(!value?.user?.id||!Array.isArray(value.companies))throw Error('ERP 登入資料不完整，請重新登入。');
-  return {user:{id:value.user.id,employee_id:value.user.employee_id,display_name:value.user.display_name,role:value.user.role},companies:value.companies.filter(c=>c&&typeof c.code==='string').map(c=>({code:c.code,name:c.name||c.code})),source:value.source?{name:String(value.source.source||'').split('/').pop(),asOf:value.source.asOf||''}:null};
+  const modules=Array.isArray(value.access?.modules)?[...new Set(value.access.modules.filter(id=>typeof id==='string'&&LIVE_MODULES.has(id)))]:null;
+  return {user:{id:value.user.id,employee_id:value.user.employee_id,display_name:value.user.display_name,role:value.user.role},access:{modules},companies:value.companies.filter(c=>c&&typeof c.code==='string').map(c=>({code:c.code,name:c.name||c.code})),source:value.source?{name:String(value.source.source||'').split('/').pop(),asOf:value.source.asOf||''}:null};
  }
  async function load(currentToken=token||savedToken()){
   if(!onPublishedHost())throw Error('請在已上線的 ERP 頁面讀取真實資料。');
@@ -93,6 +95,17 @@
  D.isLiveView=(view,params={})=>view==='people'||view==='documents'&&params.source!=='example';
  D.liveRosterInfo=()=>({connected:data.status==='connected',loading:data.status==='loading',employeeCount:data.status==='connected'?data.people.length:null,companies:data.session?.companies.map(c=>({...c,count:data.people.filter(p=>p.companyCode===c.code).length}))||[],accountLabel:data.session?`${data.session.user.display_name||'ERP 帳號'} · ${roleLabel(data.session.user.role)}`:'',error:data.error||''});
  D.liveRead=D.liveRosterInfo;
+ D.liveAllowedModules=()=>{const modules=data.session?.access.modules;return data.status==='connected'&&Array.isArray(modules)?[...modules]:null;};
+ // Embedded original modules share this tab's sessionStorage. Only an actual
+ // changed session is reloaded; navigation signals must not create a load loop.
+ D.refreshLiveSession=async()=>{
+  if(!onPublishedHost())return false;
+  const current=savedToken();
+  if(!current){const changed=busy||enabled||token||data.status!=='disconnected'||data.session||data.people.length;++generation;busy=false;enabled=false;token='';clear();if(changed)refreshUI();return false;}
+  if(manuallyHidden)return false;
+  if(current===token&&(busy||data.status==='connected'))return data.status==='connected';
+  return load(current);
+ };
  D.livePanel=(view='people')=>{
   const back=`${FORMAL}#view=${view==='documents'?'documents':'people'}`;
   const connected=data.status==='connected';
