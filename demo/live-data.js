@@ -9,7 +9,7 @@
  const SESSION_KEY='kyd_erp_workspace_github_session_v1';
  const FORMAL='https://clutchlab-ai.github.io/kyd-erp-web/';
  const KEYS=['id','employeeNumber','companyCode','displayName','nativeName','englishName','department','position','status','joined','resigned','managerId','serviceProjects','revision','sourceType','sourceSheet','sourceRow'];
- let token='',generation=0,enabled=false,busy=false;
+ let token='',generation=0,enabled=false,busy=false,manuallyHidden=false;
  let data={status:'disconnected',session:null,people:[],company:'',query:'',employment:'',error:'',updatedAt:null};
  const originalDocuments=D.modules.documents.render;
  const onPublishedHost=()=>location.protocol==='https:'&&location.hostname==='clutchlab-ai.github.io';
@@ -47,6 +47,7 @@
  }
  async function load(currentToken=token||savedToken()){
   if(!onPublishedHost())throw Error('請在已上線的 ERP 頁面讀取真實資料。');
+  manuallyHidden=false;
   if(!currentToken){enabled=false;token='';clear();refreshUI();return false;}
   const id=++generation;enabled=true;busy=true;token=currentToken;
   clear('loading');refreshUI();
@@ -66,10 +67,10 @@
    clear(rejected?'disconnected':'error',error.message);refreshUI();throw error;
   }finally{if(id===generation)busy=false;}
  }
- function disconnect(){++generation;busy=false;enabled=false;token='';clear();D.closeModal();refreshUI();D.toast('已隱藏本頁的真實資料；原 ERP 登入與資料未更動。');}
+ function disconnect(){++generation;busy=false;enabled=false;manuallyHidden=true;token='';clear();D.closeModal();refreshUI();D.toast('已隱藏本頁的真實資料；原 ERP 登入與資料未更動。');}
  async function login(email,password){
   if(!onPublishedHost())throw Error('請在已上線的 ERP 頁面登入。');
-  const id=++generation;enabled=false;busy=true;token='';clear('loading');refreshUI();
+  const id=++generation;enabled=false;busy=true;manuallyHidden=false;token='';clear('loading');refreshUI();
   try{
    const result=await call('login','',{username:String(email).trim(),password});
    if(id!==generation)return false;
@@ -95,9 +96,10 @@
  D.livePanel=(view='people')=>{
   const back=`${FORMAL}#view=${view==='documents'?'documents':'people'}`;
   const connected=data.status==='connected';
-  return `<section class="card live-source"><div class="row"><div><p class="eyebrow">原 ERP · 既有真實資料 · 唯讀</p><h2>${connected?E(data.session.user.display_name||'已登入 ERP 帳號'):'沿用原本名冊與組織'}</h2><p class="muted">${connected?`${E(roleLabel(data.session.user.role))} · 依實際登入帳號授權讀取；展示身分切換不會增加權限。`:'登入後顯示原有員工、公司、部門與職務；不會用假員工取代。'}</p></div>${D.badge(connected?'已連接真實資料':data.status==='loading'?'正在讀取':'需原 ERP 登入',connected?'green':'blue')}</div><div class="action-row">${connected?button('重新讀取','live-refresh')+button('隱藏本頁真實資料','live-disconnect'):button('使用 ERP 帳號登入','live-login',true)+(onPublishedHost()&&savedToken()?button('讀取既有登入','live-refresh'):'')}<a class="btn" href="${back}" target="_blank" rel="noopener noreferrer">開啟原 ERP ↗</a></div>${data.error?`<p class="notice amber" role="alert">${E(data.error)}；本頁沒有繼續顯示舊資料。</p>`:''}</section>`;
+  const canRestore=onPublishedHost()&&savedToken();
+  return `<section class="card live-source"><div class="row"><div><p class="eyebrow">原 ERP · 既有真實資料 · 唯讀</p><h2>${connected?E(data.session.user.display_name||'已登入 ERP 帳號'):manuallyHidden?'已隱藏本頁真實資料':data.status==='loading'?'正在讀取原有名冊':data.status==='error'?'暫時無法載入員工':'此分頁尚未登入，還沒載入員工'}</h2><p class="muted">${connected?`${E(roleLabel(data.session.user.role))} · 依實際登入帳號授權讀取；展示身分切換不會增加權限。`:manuallyHidden?`原 ERP 的員工資料仍然保留。${canRestore?'按「重新顯示員工」即可重新讀取。':'需要查看時，可使用原 ERP 帳號重新登入。'}`:'請在此頁使用原 ERP 的 email 與密碼登入，即可載入原有員工、公司、部門與職務。另一個分頁的登入不會自動帶入此頁。'}</p></div>${D.badge(connected?'已連接真實資料':data.status==='loading'?'正在讀取':manuallyHidden?'本頁已隱藏':data.status==='error'?'載入失敗':'此分頁尚未登入',connected?'green':'blue')}</div><div class="action-row">${connected?button('重新讀取','live-refresh')+button('隱藏本頁真實資料','live-disconnect'):manuallyHidden&&canRestore?button('重新顯示員工','live-refresh',true):button('使用 ERP 帳號登入','live-login',true)+(canRestore?button('讀取既有登入','live-refresh'):'')}<a class="btn" href="${back}">開啟原 ERP（同分頁）</a></div>${data.error?`<p class="notice amber" role="alert">${E(data.error)}；本頁沒有繼續顯示舊資料。</p>`:''}</section>`;
  };
- function blocked(view){return D.livePanel(view)+(data.status==='loading'?D.empty('正在讀取原 ERP 資料','這裡顯示實際帳號可見的內容，與示例角色分開。'):D.empty('登入後查看既有資料','名冊沒有被刪除或換成假資料。示例流程會另外標示。'));}
+ function blocked(view){return D.livePanel(view)+(data.status==='loading'?D.empty('正在讀取原 ERP 資料','這裡顯示實際帳號可見的內容，與示例角色分開。'):manuallyHidden?D.empty('真實資料已在本頁隱藏','原 ERP 的登入及員工資料未更動。'):D.empty('登入後查看既有資料','名冊沒有被刪除或換成假資料。示例流程會另外標示。'));}
  function sourceFoot(){return `<p class="muted space-top">資料來源：${E(data.session?.source?.name||'原 ERP 名冊')}${data.session?.source?.asOf?' · 名冊日期 '+E(data.session.source.asOf):''}。個別異動以 ERP 內已保存資料為準。<br>本頁只讀取；不更改任職公司、薪資歸屬、資料或權限。</p>`;}
  const filtered=()=>data.people.filter(p=>(!data.company||p.companyCode===data.company)&&(!data.employment||p.status===data.employment)&&(!data.query||[p.displayName,p.englishName,p.nativeName,p.employeeNumber,p.id,p.department,p.position].some(v=>String(v??'').toLocaleLowerCase().includes(data.query.toLocaleLowerCase()))));
  const number=p=>p.employeeNumber||'未提供';
@@ -139,6 +141,15 @@
   const revalidate=()=>{if(enabled&&!busy&&document.visibilityState!=='hidden')void load(token||savedToken()).catch(()=>{});};
   window.addEventListener('focus',revalidate);
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')revalidate();});
+  // A same-tab visit to the original ERP shares sessionStorage. A BFCache
+  // restore keeps this closure, so adopt the newly saved session explicitly.
+  window.addEventListener('pageshow',event=>{
+   if(!event.persisted||!onPublishedHost()||manuallyHidden)return;
+   const current=savedToken();
+   if(!current){++generation;busy=false;enabled=false;token='';clear();refreshUI();return;}
+   if(busy&&current===token)return;
+   void load(current).catch(()=>{});
+  });
   // Revalidate visible real-data panels, including revoked or expired sessions.
   setInterval(()=>{if(D.isLiveView(D.route().view,D.route()))revalidate();},60000);
  };
