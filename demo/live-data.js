@@ -10,7 +10,8 @@
  const FORMAL='https://clutchlab-ai.github.io/kyd-erp-web/';
  const LIVE_MODULES=new Set(['home','people','attendance','personal','performance','payroll','documents','changes','training','projects','applications','settings','finance','procurement','pms','engineering','customers','vendors','files','approvals','overview','my-payroll']);
  const KEYS=['id','employeeNumber','companyCode','displayName','nativeName','englishName','department','position','status','joined','resigned','managerId','serviceProjects','revision','sourceType','sourceSheet','sourceRow'];
- let token='',generation=0,enabled=false,busy=false,manuallyHidden=false;
+ let token='',generation=0,enabled=false,busy=false,manuallyHidden=false,payrollGeneration=0;
+ let payrollData={status:'idle',rows:[],error:'',company:''};
  let data={status:'disconnected',session:null,people:[],company:'',query:'',employment:'',error:'',updatedAt:null};
  const originalDocuments=D.modules.documents.render;
  const onPublishedHost=()=>location.protocol==='https:'&&location.hostname==='clutchlab-ai.github.io';
@@ -22,6 +23,7 @@
  const companyName=code=>data.session?.companies.find(c=>c.code===code)?.name||code||'未提供';
  const button=(label,action,primary=false)=>`<button type="button" class="btn${primary?' primary':''}" data-action="${action}">${label}</button>`;
  function clear(status='disconnected',error=''){
+  ++payrollGeneration;payrollData={status:'idle',rows:[],error:'',company:''};
   data={...data,status,session:null,people:[],error,updatedAt:null};
  }
  function cleanPeople(rows,companies){
@@ -34,7 +36,7 @@
  }
  async function call(endpoint,currentToken,body){
   // This adapter deliberately has no general write method.
-  if(!['session','people','login'].includes(endpoint)||(endpoint==='login')!==!!body)throw Error('不支援此操作。');
+  if(!['session','people','payroll','login'].includes(endpoint)||(endpoint==='login')!==!!body)throw Error('不支援此操作。');
   const headers={};if(currentToken)headers.Authorization='Bearer '+currentToken;
   if(body)headers['Content-Type']='application/json';
   const response=await fetch(API+endpoint,{method:body?'POST':'GET',credentials:'omit',cache:'no-store',headers,...(body?{body:JSON.stringify(body)}:{})});
@@ -92,7 +94,7 @@
    D.toast('已讀取原 ERP 授權範圍內的真實資料。');return true;
   },'登入並讀取名冊');
  }
- D.isLiveView=(view,params={})=>view==='people'||view==='documents'&&params.source!=='example';
+ D.isLiveView=(view,params={})=>['people','salary','my-payroll'].includes(view)||view==='documents'&&params.source!=='example';
  D.liveRosterInfo=()=>({connected:data.status==='connected',loading:data.status==='loading',employeeCount:data.status==='connected'?data.people.length:null,companies:data.session?.companies.map(c=>({...c,count:data.people.filter(p=>p.companyCode===c.code).length}))||[],accountLabel:data.session?`${data.session.user.display_name||'ERP 帳號'} · ${roleLabel(data.session.user.role)}`:'',error:data.error||''});
  D.liveRead=D.liveRosterInfo;
  D.liveAllowedModules=()=>{const modules=data.session?.access.modules;return data.status==='connected'&&Array.isArray(modules)?[...modules]:null;};
@@ -107,7 +109,7 @@
   return load(current);
  };
  D.livePanel=(view='people')=>{
-  const back=`${FORMAL}#view=${view==='documents'?'documents':'people'}`;
+  const back=`${FORMAL}#view=${({documents:'documents',salary:'payroll','my-payroll':'my-payroll'})[view]||'people'}`;
   const connected=data.status==='connected';
   const canRestore=onPublishedHost()&&savedToken();
   return `<section class="card live-source"><div class="row"><div><p class="eyebrow">原 ERP · 既有真實資料 · 唯讀</p><h2>${connected?E(data.session.user.display_name||'已登入 ERP 帳號'):manuallyHidden?'已隱藏本頁真實資料':data.status==='loading'?'正在讀取原有名冊':data.status==='error'?'暫時無法載入員工':'此分頁尚未登入，還沒載入員工'}</h2><p class="muted">${connected?`${E(roleLabel(data.session.user.role))} · 依實際登入帳號授權讀取；展示身分切換不會增加權限。`:manuallyHidden?`原 ERP 的員工資料仍然保留。${canRestore?'按「重新顯示員工」即可重新讀取。':'需要查看時，可使用原 ERP 帳號重新登入。'}`:'請在此頁使用原 ERP 的 email 與密碼登入，即可載入原有員工、公司、部門與職務。另一個分頁的登入不會自動帶入此頁。'}</p></div>${D.badge(connected?'已連接真實資料':data.status==='loading'?'正在讀取':manuallyHidden?'本頁已隱藏':data.status==='error'?'載入失敗':'此分頁尚未登入',connected?'green':'blue')}</div><div class="action-row">${connected?button('重新讀取','live-refresh')+button('隱藏本頁真實資料','live-disconnect'):manuallyHidden&&canRestore?button('重新顯示員工','live-refresh',true):button('使用 ERP 帳號登入','live-login',true)+(canRestore?button('讀取既有登入','live-refresh'):'')}<a class="btn" href="${back}">開啟原 ERP（同分頁）</a></div>${data.error?`<p class="notice amber" role="alert">${E(data.error)}；本頁沒有繼續顯示舊資料。</p>`:''}</section>`;
@@ -125,16 +127,73 @@
   const rows=filtered(),active=rows.filter(p=>p.status==='在職').length;
   return heading+D.livePanel('people')+`<section class="card space-top">${filters()}</section><div class="grid three space-top"><div class="stat"><small>符合篩選的真實員工</small><strong>${rows.length}</strong></div><div class="stat"><small>在職</small><strong>${active}</strong></div><div class="stat"><small>已授權公司</small><strong>${data.session.companies.length}</strong><p>依原 ERP 帳號授權</p></div></div>${rows.length?`<section class="card table-wrap live-roster-desktop space-top"><table><thead><tr><th>員工</th><th>任職／薪資公司</th><th>部門</th><th>職務</th><th>支援項目</th><th>狀態</th><th></th></tr></thead><tbody>${rows.map(p=>`<tr><td><strong>${E(p.displayName)}</strong><div class="muted">${E(number(p))}</div></td><td>${E(companyName(p.companyCode))}</td><td>${E(p.department||'未提供')}</td><td>${E(p.position||'未提供')}</td><td>${E(Array.isArray(p.serviceProjects)&&p.serviceProjects.length?p.serviceProjects.join(' / '):'待設定')}</td><td>${D.badge(p.status||'未提供',p.status==='在職'?'green':'neutral')}</td><td><a class="btn" href="#view=people&id=${encodeURIComponent(p.id)}">查看</a></td></tr>`).join('')}</tbody></table></section><div class="live-roster-mobile">${rows.map(p=>`<article class="card"><div class="row"><h3>${E(p.displayName)}</h3>${D.badge(p.status||'未提供',p.status==='在職'?'green':'neutral')}</div><p class="muted">${E(number(p))} · ${E(companyName(p.companyCode))}</p><p>${E(p.department||'部門未提供')} · ${E(p.position||'職務未提供')}</p><a class="btn" href="#view=people&id=${encodeURIComponent(p.id)}">查看任職資料</a></article>`).join('')}</div>`:D.empty('沒有符合篩選的員工','可調整公司、狀態或搜尋字詞；沒有自動補入假員工。')}${sourceFoot()}`;
  }
- const documentColumns=[['employmentContract','勞動合約'],['cv','履歷（原資料）'],['confidentiality','保密協議']];
+ const documentColumns=[['employmentContract','勞動合約'],['passport','護照'],['workPermit','工作許可'],['visa','簽證'],['confidentiality','保密協議'],['cv','履歷（原資料）']];
  function flag(doc,key){if(!Object.hasOwn(doc,key)||doc[key]===null||doc[key]==='')return D.badge('未提供','neutral');if(doc[key]===true)return D.badge('已確認有資料','green');if(doc[key]===false)return D.badge('待核對','amber');return `<span>${E(doc[key])}</span>`;}
+ function documentValue(doc,key){return ['passport','workPermit','visa'].includes(key)?D.badge('尚未提供','neutral'):flag(doc,key);}
  function documents(params={}){
-  const tabs=`<nav class="subnav"><a class="${params.source==='example'?'':'active'}" href="#view=documents">既有真實資料</a><a class="${params.source==='example'?'active':''}" href="#view=documents&source=example">續辦流程示例</a></nav>`;
-  if(params.source==='example')return tabs+`<div class="notice amber"><strong>以下是獨立流程示例。</strong>人物、證件與到期日都是假資料；跟進操作不會修改原名冊。<a href="#view=documents">返回既有真實資料 →</a></div>`+originalDocuments(params);
-  const heading='<div class="page-head"><div><p class="eyebrow">行政人事 · 原 ERP 真實資料</p><h1>證件與合約</h1><p class="lede">保留原名冊已提供的文件註記。未提供的證件或期限，不補成假資料。</p></div></div>';
-  if(data.status!=='connected')return heading+tabs+blocked('documents');
+  const tabs=`<nav class="subnav"><a class="${params.source==='example'?'':'active'}" href="#view=documents">原有員工文件</a><a class="${params.source==='example'?'active':''}" href="#view=documents&source=example">證件期限與續辦示例</a></nav>`;
+  if(params.source==='example')return tabs+`<div class="notice amber"><strong>以下是獨立流程示例。</strong>人物、證件與到期日都是假資料；跟進操作不會修改原名冊。<a href="#view=documents">返回原有員工文件 →</a></div>`+originalDocuments(params);
+  const heading='<div class="page-head"><div><p class="eyebrow">行政人事</p><h1>證件與合約</h1><p class="lede">勞動合約、護照、工作許可、簽證與保密協議，依員工集中查看。</p></div><a class="btn primary" href="#view=documents&source=example">查看證件期限與續辦示例</a></div>';
+  const workflow=`<section class="card"><div class="row"><div><h2>證件期限與續辦</h2><p class="muted">查看有效期限 → 跟進補件或續辦 → 收到新證件後更新期限。</p></div></div><div class="action-row">${documentColumns.filter(([key])=>key!=='cv').map(([,label])=>D.badge(label,'blue')).join('')}</div><p class="muted">原有文件註記保留在下方。到期提醒、續辦狀態與跟進紀錄可在示例中操作；尚未提供的真實證件與期限維持空缺。</p></section>`;
+  if(data.status!=='connected')return heading+tabs+workflow+blocked('documents');
   const rows=filtered().filter(p=>p.documents);
-  return heading+tabs+D.livePanel('documents')+`<section class="card space-top">${filters()}</section><div class="notice blue">以下是原名冊的文件註記，不代表已上傳檔案或已核對有效期限。履歷原資料保留，不放入新的續辦示例。</div>${rows.length?`<section class="card table-wrap live-roster-desktop"><table><thead><tr><th>員工／公司</th>${documentColumns.map(([,title])=>`<th>${title}</th>`).join('')}<th>護照／工作許可／簽證</th><th>有效期限</th></tr></thead><tbody>${rows.map(p=>`<tr><td><strong>${E(p.displayName)}</strong><div class="muted">${E(companyName(p.companyCode))}</div></td>${documentColumns.map(([key])=>`<td>${flag(p.documents,key)}</td>`).join('')}<td>尚未提供</td><td>尚未提供</td></tr>`).join('')}</tbody></table></section><div class="live-roster-mobile">${rows.map(p=>`<article class="card"><h3>${E(p.displayName)}</h3><p class="muted">${E(companyName(p.companyCode))}</p>${documentColumns.map(([key,title])=>`<div class="row"><strong>${title}</strong>${flag(p.documents,key)}</div>`).join('')}<p class="notice">護照／工作許可／簽證與有效期限：尚未提供。</p></article>`).join('')}</div>`:D.empty('目前沒有可查看的文件註記','可能尚未提供，或此帳號沒有文件查看權限；不以示例資料代替。')}${sourceFoot()}`;
+  return heading+tabs+workflow+D.livePanel('documents')+`<section class="card space-top">${filters()}</section><div class="notice blue">以下是原名冊的文件註記，不代表已上傳檔案或已核對有效期限。護照、工作許可與簽證資料尚未提供，不用示例內容補入。</div>${rows.length?`<section class="card table-wrap live-roster-desktop"><table><thead><tr><th>員工／公司</th>${documentColumns.map(([,title])=>`<th>${title}</th>`).join('')}<th>有效期限</th></tr></thead><tbody>${rows.map(p=>`<tr><td><strong>${E(p.displayName)}</strong><div class="muted">${E(companyName(p.companyCode))}</div></td>${documentColumns.map(([key])=>`<td>${documentValue(p.documents,key)}</td>`).join('')}<td>尚未提供</td></tr>`).join('')}</tbody></table></section><div class="live-roster-mobile">${rows.map(p=>`<article class="card"><h3>${E(p.displayName)}</h3><p class="muted">${E(companyName(p.companyCode))}</p>${documentColumns.map(([key,title])=>`<div class="row"><strong>${title}</strong>${documentValue(p.documents,key)}</div>`).join('')}<p class="notice">證件有效期限：尚未提供。</p></article>`).join('')}</div>`:D.empty('目前沒有可查看的文件註記','可能尚未提供，或此帳號沒有文件查看權限；不以示例資料代替。')}${sourceFoot()}`;
  }
+ const hasPayrollAccess=()=>data.session?.access.modules?.includes('payroll')===true;
+ const hasOwnPayroll=()=>!!data.session?.user.employee_id;
+ const salaryVisible=()=>data.status!=='connected'||hasPayrollAccess()||hasOwnPayroll();
+ function cleanPayroll(rows){
+  const scope=new Set(data.session.companies.map(c=>c.code)),full=hasPayrollAccess(),ownId=data.session.user.employee_id;
+  const keys=['id','employeeNumber','companyCode','displayName','department','position','status'];
+  return rows.filter(p=>p&&typeof p==='object'&&scope.has(p.companyCode)&&(full||p.id===ownId)).map(p=>{
+   const out=Object.fromEntries(keys.filter(k=>Object.hasOwn(p,k)).map(k=>[k,String(p[k]??'')]));
+   for(const key of ['basicSalary','allowance','serviceCharge'])out[key]=typeof p[key]==='number'&&Number.isFinite(p[key])?p[key]:null;
+   return out;
+  });
+ }
+ async function loadPayroll(){
+  if(!onPublishedHost()||data.status!=='connected'||(!hasPayrollAccess()&&!hasOwnPayroll()))return false;
+  const currentToken=token,sessionGeneration=generation;
+  if(savedToken()!==currentToken){void D.refreshLiveSession();return false;}
+  const id=++payrollGeneration;
+  payrollData={...payrollData,status:'loading',rows:[],error:''};
+  try{
+   const result=await call('payroll',currentToken);
+   if(id!==payrollGeneration||sessionGeneration!==generation||data.status!=='connected'||currentToken!==token)return false;
+   if(!Array.isArray(result.rows))throw Error('薪資資料格式不完整，請重新讀取。');
+   payrollData={...payrollData,status:'connected',rows:cleanPayroll(result.rows),error:''};
+   refreshUI();return true;
+  }catch(error){
+   if(id!==payrollGeneration||sessionGeneration!==generation)return false;
+   payrollData={...payrollData,status:'error',rows:[],error:error.message};refreshUI();return false;
+  }
+ }
+ const salaryValue=value=>value===null?'<span class="muted">未提供</span>':E(D.money(value));
+ function salary(params={},ownOnly=false){
+  const full=hasPayrollAccess()&&!ownOnly,ownId=data.session?.user.employee_id;
+  const heading=`<div class="page-head"><div><p class="eyebrow">行政人事 · 原 ERP 真實資料</p><h1>${ownOnly||!full&&ownId?'我的薪資資料':'薪酬與社保'}</h1><p class="lede">依任職／薪資公司查看原有薪資基礎資料。支援其他項目不會改變發薪公司。</p></div></div>`;
+  if(data.status!=='connected')return heading+blocked(ownOnly?'my-payroll':'salary');
+  if(!hasPayrollAccess()&&!hasOwnPayroll()||ownOnly&&!ownId)return heading+D.empty('此帳號沒有薪資查看權限','依實際登入帳號授權顯示；切換示例身分不會取得薪資權限。');
+  const tabs=hasPayrollAccess()&&ownId?`<nav class="subnav"><a href="#view=salary" class="${ownOnly?'':'active'}">授權公司薪資</a><a href="#view=my-payroll" class="${ownOnly?'active':''}">我的薪資資料</a></nav>`:'';
+  const account=`<section class="card"><div class="row"><div><strong>${E(data.session.user.display_name||'已登入 ERP 帳號')}</strong><p class="muted">${full?'只顯示原 ERP 授權查看的員工薪資。':'只顯示實際登入帳號所綁定員工的薪資。'}</p></div>${button('重新讀取','live-payroll-refresh')}</div></section>`;
+  if(payrollData.status==='idle')void loadPayroll();
+  if(payrollData.status==='loading')return heading+tabs+account+D.empty('正在讀取原有薪資資料','不使用展示身分或假金額替代。');
+  if(payrollData.status==='error')return heading+tabs+account+D.empty('暫時無法讀取薪資',E(payrollData.error));
+  const visible=payrollData.rows.filter(p=>p.status==='在職'&&(full||p.id===ownId)),codes=[...new Set(visible.map(p=>p.companyCode))];
+  const rows=visible.filter(p=>!full||!payrollData.company||p.companyCode===payrollData.company);
+  const filters=full?`<form class="form-grid live-filters" data-live-payroll-filters><label class="field">薪資歸屬公司${D.select('company',[['','全部已授權薪資公司'],...codes.map(code=>[code,companyName(code)])],payrollData.company,false)}</label><div class="action-row"><button type="submit" class="btn primary">查看</button></div></form>`:'';
+  const note='<div class="notice blue">這是名冊中的薪資基礎資料，尚未計算考勤、扣款、稅金、社保與實發薪資。服務費獨立列示，尚未併入計薪；此頁不會計薪或發薪。</div>';
+  const columns=[['basicSalary','基本薪資'],['allowance','津貼'],['serviceCharge','服務費']];
+  return heading+tabs+account+(filters?`<section class="card space-top">${filters}</section>`:'')+`<div class="grid three space-top"><div class="stat"><small>在職員工</small><strong>${rows.length}</strong></div><div class="stat"><small>基本薪資待補</small><strong>${rows.filter(p=>p.basicSalary===null).length}</strong></div><div class="stat"><small>薪資歸屬公司</small><strong>${new Set(rows.map(p=>p.companyCode)).size}</strong></div></div>`+note+(rows.length?`<section class="card table-wrap live-roster-desktop"><table><thead><tr><th>員工</th><th>薪資歸屬公司</th><th>職務</th>${columns.map(([,title])=>`<th>${title}</th>`).join('')}</tr></thead><tbody>${rows.map(p=>`<tr><td><strong>${E(p.displayName)}</strong><div class="muted">${E(p.employeeNumber||'未提供')}</div></td><td>${E(companyName(p.companyCode))}</td><td>${E(p.position||'未提供')}</td>${columns.map(([key])=>`<td>${salaryValue(p[key])}</td>`).join('')}</tr>`).join('')}</tbody></table></section><div class="live-roster-mobile">${rows.map(p=>`<article class="card"><h2>${E(p.displayName)}</h2><p class="muted">${E(companyName(p.companyCode))} · ${E(p.position||'職務未提供')}</p>${columns.map(([key,title])=>`<div class="row"><strong>${title}</strong><span>${salaryValue(p[key])}</span></div>`).join('')}</article>`).join('')}</div>`:D.empty('目前沒有可查看的在職薪資資料','可能尚未提供，或此帳號沒有對應員工／公司的薪資權限。'))+sourceFoot();
+ }
+ D.modules.salary={...D.modules.salary,pending:false,roles:Object.keys(D.roles),canView:salaryVisible,render:params=>salary(params)};
+ D.register('my-payroll',{title:'我的薪資資料',group:'行政人事',nav:false,roles:Object.keys(D.roles),canView:()=>data.status!=='connected'||hasOwnPayroll(),render:params=>salary(params,true)});
+ D.on('live-payroll-refresh',()=>load(token||savedToken()).catch(error=>D.toast(error.message)));
+ document.addEventListener('submit',event=>{
+  const form=event.target.closest?.('[data-live-payroll-filters]');if(!form)return;
+  event.preventDefault();const values=Object.fromEntries(new FormData(form));
+  payrollData.company=payrollData.rows.some(p=>p.companyCode===values.company)?values.company:'';refreshUI();
+ });
  D.modules.people.render=people;D.modules.people.roles=Object.keys(D.roles);D.modules.people.canView=()=>true;
  D.modules.documents.render=documents;D.modules.documents.roles=Object.keys(D.roles);D.modules.documents.canView=()=>true;
  D.on('live-login',loginDialog);
