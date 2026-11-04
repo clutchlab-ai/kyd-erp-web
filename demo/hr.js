@@ -21,6 +21,13 @@
       const sources = [['e01','KYD'], ['h01','KYD'], ['m01','KYD'], ['e02','ZEUS'], ['f01','KYD'], ['h02','KYD']];
       s.hrDocuments = sources.flatMap(([employeeId, company], i) => TYPES.map(([type, label], j) => ({id: `DOC-${employeeId}-${type}`, employeeId, company, type, label, number: `${['LC','PP','WP','VS','NDA'][j]}-SAMPLE-${i + 1}`, issuedOn: '2026-01-01', expiresOn: type === 'nda' ? '' : i === 0 && type === 'permit' ? '2026-10-20' : i === 0 && type === 'visa' ? '2026-11-20' : i === 2 && type === 'passport' ? '2026-11-28' : '2027-06-30', followups: []})));
     }
+    // Add only missing synthetic role examples; never replace existing expiry/follow-up data.
+    if (!s.documentContentsV2) {
+      for (const p of s.people) for (const [type,label] of TYPES) {
+        if (!s.hrDocuments.some(d=>d.employeeId===p.id&&d.type===type)) s.hrDocuments.push({id:`DOC-${p.id}-${type}`,employeeId:p.id,company:p.company,type,label,number:`DEMO-${p.id}-${type}`,issuedOn:'2026-01-01',expiresOn:type==='nda'?'':'2027-06-30',followups:[]});
+      }
+      s.documentContentsV2=true;
+    }
   };
   const profile = key => PROFILE[key] || PROFILE.administrative_assistant;
   D.hrPermissionProfile = key => profile(key);
@@ -126,31 +133,59 @@
   function documentStatus(doc) {
     if (!doc.expiresOn) return {label:'無固定到期日',tone:'neutral',days:null};
     const days=D.daysUntil(doc.expiresOn);
-    return days<0?{label:'已到期',tone:'red',days}:days<=30?{label:'即將到期',tone:'amber',days}:{label:'有效',tone:'green',days};
+    return days<0?{label:'已到期',tone:'red',days}:days<=(D.state.adminDemoSettings?.documentReminderDays??30)?{label:'即將到期',tone:'amber',days}:{label:'有效',tone:'green',days};
   }
-  const docsVisible = () => (D.state.hrDocuments || []).filter(d => visibleCompany(d.company) && (!['employee','manager','finance'].includes(D.role) || d.employeeId===D.actor.id));
-  function renderDocuments() {
-    const docs=docsVisible(), employeeIds=[...new Set(docs.map(d=>d.employeeId))];
+  const docsVisible = () => (D.state.hrDocuments || []).filter(d => !d.supersededBy && visibleCompany(d.company) && (!['employee','manager','finance'].includes(D.role) || d.employeeId===D.actor.id));
+  const documentEditor=()=>['hr','hrmanager','admin'].includes(D.role);
+  const validDate=v=>/^\d{4}-\d{2}-\d{2}$/.test(v)&&Number.isFinite(Date.parse(v+'T12:00:00Z'))&&new Date(v+'T12:00:00Z').toISOString().slice(0,10)===v;
+  function renderDocuments(params={}) {
+    const visible=docsVisible(), tab=params.status||'all';
+    const docs=visible.filter(d=>tab==='expired'?documentStatus(d).tone==='red':tab==='soon'?documentStatus(d).tone==='amber':tab==='following'?d.followups?.length:true), employeeIds=[...new Set(docs.map(d=>d.employeeId))];
     const expired=docs.filter(d=>documentStatus(d).tone==='red').length, soon=docs.filter(d=>documentStatus(d).tone==='amber').length;
-    return head('行政人事', '證件與合約', '查看每位員工的證件期限，優先處理已到期與即將到期項目，並留下跟進紀錄。')+
-      `<div class="grid three document-metrics"><section class="card stat"><span>已到期</span><strong>${expired}</strong><small>優先跟進補辦進度</small></section><section class="card stat"><span>即將到期</span><strong>${soon}</strong><small>示例以 30 天內呈現</small></section><section class="card stat"><span>追蹤中的證件</span><strong>${docs.filter(d=>d.followups?.length).length}</strong><small>每筆保留處理紀錄</small></section></div>`+
+    return head('行政人事', '證件與合約', '查看期限、預覽文件、補登資料，再記錄補件或續辦進度。',documentEditor()?btn('登錄證件示例','hr-doc-new','',true):'')+
+      `<nav class="subnav">${[['all','全部證件'],['expired','已到期'],['soon','即將到期'],['following','跟進中']].map(([key,label])=>`<a class="${tab===key?'active':''}" href="#view=documents&source=example&status=${key}">${label}</a>`).join('')}</nav>`+
+      `<div class="grid three document-metrics"><section class="card stat"><span>已到期</span><strong>${expired}</strong><small>優先跟進補辦進度</small></section><section class="card stat"><span>即將到期</span><strong>${soon}</strong><small>示例以 ${D.state.adminDemoSettings?.documentReminderDays??30} 天內呈現</small></section><section class="card stat"><span>追蹤中的證件</span><strong>${docs.filter(d=>d.followups?.length).length}</strong><small>每筆保留處理紀錄</small></section></div>`+
       `<div class="table-wrap card docs-desktop"><table><thead><tr><th>員工／公司</th>${TYPES.map(([,v])=>`<th>${v}</th>`).join('')}</tr></thead><tbody>${employeeIds.map(id=>{const p=person(id);return `<tr><td><strong>${E(p?.name||'示例員工')}</strong><br><span class="muted">${E(p?.company)}・${E(p?.title)}</span></td>${TYPES.map(([type])=>{const d=docs.find(x=>x.employeeId===id&&x.type===type);if(!d)return '<td>—</td>';const st=documentStatus(d);return `<td><button class="doc-link" data-action="hr-doc" data-id="${E(d.id)}">${D.badge(st.label,st.tone)}<br><small>${E(d.expiresOn||'已留存')}</small>${d.followups.length?'<br><small>已有跟進紀錄</small>':''}</button></td>`}).join('')}</tr>`}).join('')}</tbody></table></div>`+
       `<div class="docs-mobile">${employeeIds.map(id=>{const p=person(id);return `<article class="card doc-person"><h2>${E(p?.name||'示例員工')}</h2><p class="muted">${E(p?.company)}・${E(p?.title)}</p><div class="doc-mobile-list">${TYPES.map(([type,label])=>{const d=docs.find(x=>x.employeeId===id&&x.type===type);if(!d)return '';const st=documentStatus(d);return `<button class="doc-mobile-row" data-action="hr-doc" data-id="${E(d.id)}" aria-label="${E(p?.name)}的${E(label)}，${E(st.label)}"><span class="doc-mobile-label"><strong>${E(label)}</strong><small>${d.expiresOn?'有效至 '+E(d.expiresOn):'無固定到期日'}${d.followups.length?'・已有跟進紀錄':''}</small></span><span>${D.badge(st.label,st.tone)} <span aria-hidden="true">›</span></span></button>`}).join('')}</div></article>`}).join('')}</div>`+
-      `<p class="muted">點選狀態可看期限並記錄跟進。30 天是展示範例；正式提醒天數、對象與通知管道待確認。這裡不會發送 email 或訊息。</p>`;
+      (docs.length?'':D.empty('目前沒有符合條件的證件','可切回全部證件，或由人資登錄證件示例。'))+
+      `<p class="muted">點選狀態可看期限並記錄跟進。${D.state.adminDemoSettings?.documentReminderDays??30} 天是展示範例；正式提醒天數、對象與通知管道待確認。這裡不會發送 email 或訊息。</p>`;
   }
   function openDoc(id) {
     const doc=docsVisible().find(d=>d.id===id);if(!doc){D.toast('這份證件不在目前可見範圍。');return;}
-    const st=documentStatus(doc),p=person(doc.employeeId),editable=['hr','hrmanager'].includes(D.role);
-    const top=`<div class="row">${D.badge(st.label,st.tone)}<span>${E(p?.name)}・${E(doc.company)}</span></div><dl><dt>證件類型</dt><dd>${E(doc.label)}</dd><dt>示例編號</dt><dd>${E(doc.number)}</dd><dt>有效期間</dt><dd>${E(doc.issuedOn)} → ${E(doc.expiresOn||'無固定到期日')}</dd></dl>`;
+    const st=documentStatus(doc),p=person(doc.employeeId),editable=documentEditor();
+    const top=`<div class="row">${D.badge(st.label,st.tone)}<span>${E(p?.name)}・${E(doc.company)}</span></div><dl><dt>證件類型</dt><dd>${E(doc.label)}</dd><dt>示例編號</dt><dd>${E(doc.number)}</dd><dt>有效期間</dt><dd>${E(doc.issuedOn)} → ${E(doc.expiresOn||'無固定到期日')}</dd></dl><div class="action-row">${btn('預覽示例附件','hr-doc-preview',doc.id)}${editable?btn('修改證件資料','hr-doc-edit',doc.id):''}</div>`;
     const history=`<h3>跟進紀錄</h3>${doc.followups.length?`<div class="timeline">${doc.followups.map(f=>`<article><strong>${E(f.status)}</strong><p>${E(f.note)}</p><small>${E(f.at)}・${E(f.actor)}${f.nextOn?`・下次跟進 ${E(f.nextOn)}`:''}</small></article>`).join('')}</div>`:'<p class="muted">尚未記錄跟進。</p>'}`;
     if(!editable){D.modal(`${doc.label}・${p?.name}`,top+history+`<p class="muted">人資可記錄補件與續辦進度；其他身份只看授權範圍內的內容。</p>`,null);return;}
-    D.modal(`${doc.label}・${p?.name}`,top+`<div class="form-grid"><label class="field">跟進狀態${D.select('status',[['已提醒補件','已提醒補件'],['續辦中','續辦中'],['已收到新證件','已收到新證件']],doc.followups.at(-1)?.status||'已提醒補件')}</label><label class="field">下次跟進日期<input name="nextOn" type="date" value="${E(D.dateAdd(D.today,7))}" required></label><label class="field full">處理內容<textarea name="note" required maxlength="500" rows="3" placeholder="例如：已請員工準備續辦資料，下週確認受理進度。"></textarea></label><label class="field">新到期日（有新證件才填）<input name="newExpiry" type="date"></label></div>${history}<p class="muted">這個按鈕只記錄跟進，不會對外發訊息。續辦中不代表證件已有效；輸入新到期日後才更新狀態。</p>`, values=>{
+    D.modal(`${doc.label}・${p?.name}`,top+`<div class="form-grid"><label class="field">跟進狀態${D.select('status',[['已提醒補件','已提醒補件'],['續辦中','續辦中'],['已收到新證件','已收到新證件']],doc.followups.at(-1)?.status||'已提醒補件')}</label><label class="field">下次跟進日期<input name="nextOn" type="date" value="${E(D.dateAdd(D.today,D.state.adminDemoSettings?.followupDays??7))}" required></label><label class="field full">處理內容<textarea name="note" required maxlength="500" rows="3" placeholder="例如：已請員工準備續辦資料，下週確認受理進度。"></textarea></label><label class="field">新到期日（有新證件才填）<input name="newExpiry" type="date"></label></div>${history}<p class="muted">這個按鈕只記錄跟進，不會對外發訊息。續辦中不代表證件已有效；輸入新到期日後才更新狀態。</p>`, values=>{
+      if(!documentEditor()||!docsVisible().some(x=>x===doc))throw new Error('目前身分或公司無法修改這份證件。');
+      if(!['已提醒補件','續辦中','已收到新證件'].includes(values.status)||!validDate(values.nextOn)||values.nextOn<D.today)throw new Error('請選擇跟進狀態及有效的下次跟進日期。');
       if(!values.note.trim())throw new Error('請填寫處理內容。');
-      if(values.newExpiry && (values.status!=='已收到新證件'||values.newExpiry<=D.today))throw new Error('確認收到新證件後，才能填寫新的有效到期日。');
+      if(values.newExpiry && (values.status!=='已收到新證件'||!validDate(values.newExpiry)||values.newExpiry<=D.today))throw new Error('確認收到新證件後，才能填寫新的有效到期日。');
       doc.followups.push({at:D.today,actor:D.actor.name,status:values.status,note:values.note.trim(),nextOn:values.nextOn,previousExpiry:doc.expiresOn});
       if(values.newExpiry)doc.expiresOn=values.newExpiry;
       D.log(`記錄 ${p?.name} 的${doc.label}跟進`);D.save();D.render();D.toast('跟進紀錄已儲存；未發送任何外部通知。');
     },'記錄跟進');
+  }
+  function documentForm(id='') {
+    if(!documentEditor())throw new Error('由人資或管理員登錄證件。');
+    const doc=id?docsVisible().find(d=>d.id===id):null,company=D.state.company,actor=D.actor.id;
+    if(id&&!doc)throw new Error('無法修改其他公司或身份的證件。');
+    const candidates=D.state.people.filter(p=>p.company===company&&p.active!==false);
+    D.modal(doc?'修改證件資料':'登錄證件示例',`<p class="notice">只保存假資料。同類證件再次登錄會成為新版本，原版本保留在紀錄中。</p><div class="form-grid"><label class="field">示例員工${D.select('employeeId',candidates.map(p=>[p.id,p.name+' · '+p.title]),doc?.employeeId||D.actor.id)}</label><label class="field">證件類型${D.select('type',TYPES,doc?.type||'labor')}</label><label class="field full">示例編號<input name="number" maxlength="100" required value="${E(doc?.number||'DEMO-')}" autocomplete="off"></label><label class="field">簽發日期<input name="issuedOn" type="date" required value="${E(doc?.issuedOn||D.today)}"></label><label class="field">到期日期（無固定期限可留空）<input name="expiresOn" type="date" value="${E(doc?.expiresOn)}"></label><label class="field full">文件備註<textarea name="note" maxlength="600">${E(doc?.note)}</textarea></label></div>`,v=>{
+      if(!documentEditor()||D.state.company!==company||D.actor.id!==actor||doc&&!docsVisible().includes(doc))throw new Error('身分或公司已變更，請重新開啟。');
+      if(!candidates.some(p=>p.id===v.employeeId)||!TYPES.some(([type])=>type===v.type)||!v.number.trim())throw new Error('請選擇同公司的示例員工、證件類型及編號。');
+      if(!validDate(v.issuedOn)||v.expiresOn&&(!validDate(v.expiresOn)||v.expiresOn<v.issuedOn))throw new Error('請填寫有效日期，到期日不能早於簽發日。');
+      const previous=D.state.hrDocuments.find(d=>d!==doc&&!d.supersededBy&&d.employeeId===v.employeeId&&d.type===v.type);
+      if(doc&&previous)throw new Error('已有此類證件，請維持原類型，或另行登錄新版本。');
+      const row=doc||{id:'DOC-NEW-'+Date.now()+'-'+D.state.hrDocuments.length,company,followups:[]};
+      if(doc) {row.revisions??=[];row.revisions.push({at:D.today,actor:D.actor.name,number:row.number,issuedOn:row.issuedOn,expiresOn:row.expiresOn});}
+      Object.assign(row,{employeeId:v.employeeId,type:v.type,label:TYPES.find(([type])=>type===v.type)[1],number:v.number.trim(),issuedOn:v.issuedOn,expiresOn:v.expiresOn||'',note:v.note||''});
+      if(!doc){if(previous){row.revisions=[...(previous.revisions||[]),{at:D.today,actor:D.actor.name,number:previous.number,issuedOn:previous.issuedOn,expiresOn:previous.expiresOn}];row.followups=[...(previous.followups||[])];previous.supersededBy=row.id;}D.state.hrDocuments.push(row);}D.log('登錄證件示例 '+row.id);D.save();D.render();D.toast('示例證件已保存。');
+    },'儲存證件');
+  }
+  function previewDocument(id){
+    const doc=docsVisible().find(d=>d.id===id);if(!doc)throw new Error('這份證件不在可見範圍。');
+    D.modal('示例附件預覽',`<article class="card"><p class="eyebrow">功能演示文件 · 非正式證件</p><h2>${E(doc.label)}</h2><p>${E(person(doc.employeeId)?.name)} · ${E(doc.company)}</p><p>示例編號：${E(doc.number)}</p><p>簽發：${E(doc.issuedOn)}　有效至：${E(doc.expiresOn||'無固定期限')}</p><hr><p>${E(doc.note||'此頁示範打開附件後的閱讀位置。正式附件需另行上傳及核對。')}</p><p class="notice">這是根據假資料產生的預覽，沒有上傳或下載任何人的真實證件。</p></article>${doc.revisions?.length?`<h3>修改前版本</h3>${doc.revisions.map(r=>`<p>${E(r.at)} · ${E(r.actor)} · ${E(r.number)} · ${E(r.expiresOn||'無固定期限')}</p>`).join('')}` : ''}`,null);
   }
   function renderAccess(params={}) {
     const r=request(params.id)||D.state.hrRequests.find(x=>x.employeeId==='e01'),p=person('e01');
@@ -166,4 +201,7 @@
   D.on('hr-edit',el=>editRequest(el.dataset.id));
   for(const action of ['submit','review','approve','apply','return'])D.on(`hr-${action}`,el=>confirmTransition(action,el.dataset.id));
   D.on('hr-doc',el=>openDoc(el.dataset.id));
+  D.on('hr-doc-new',()=>documentForm());
+  D.on('hr-doc-edit',el=>documentForm(el.dataset.id));
+  D.on('hr-doc-preview',el=>previewDocument(el.dataset.id));
 })();
