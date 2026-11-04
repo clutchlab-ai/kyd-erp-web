@@ -6,13 +6,13 @@
   const name = id => person(id)?.name || id;
   const projects = () => D.state.engineeringProjects || [];
   const statusText = {working:'進行中',inspection:'待主管驗收',accepted:'已驗收',returned:'退回改善'};
-  const isEngineer = () => person('e01')?.active !== false && person('e01')?.profile === 'engineering_assistant';
-  const mayRead = p => p.company === D.state.company && (
+  const isEngineer = () => person(D.actor.id)?.active !== false && person(D.actor.id)?.profile === 'engineering_assistant';
+  const mayRead = p => !!p && p.company === D.state.company && (['ceo','chairman','admin'].includes(D.role)||D.company===D.actor.company) && (
     ['admin','manager','ceo','chairman'].includes(D.role) ||
     (D.role === 'employee' && isEngineer() && p.work.some(w => w.assigneeId === D.actor.id))
   );
   const mayManage = p => mayRead(p) && ['manager','admin'].includes(D.role);
-  const mayUpdate = (p,w) => mayRead(p) && (mayManage(p) || (D.role === 'employee' && w.assigneeId === D.actor.id));
+  const mayUpdate = (p,w) => !!w && mayRead(p) && (mayManage(p) || (D.role === 'employee' && w.assigneeId === D.actor.id));
   const mayInspect = (p,w) => !!w && w.status === 'inspection' && mayManage(p) && w.assigneeId !== D.actor.id && !!w.reports.at(-1)?.actorId && w.reports.at(-1).actorId !== D.actor.id;
   const find = id => projects().find(p => p.id === id);
   const event = (p,text) => { p.history.unshift({at:D.today,actor:D.actor.name,text}); D.log(text); };
@@ -47,13 +47,14 @@
   function render(params={}) {
     const rows = projects().filter(mayRead);
     if (!rows.length) return `<header class="page-head"><div><p class="eyebrow">工程與採購</p><h1>工程與專案</h1><p class="lede">工作進度、最新文件與驗收紀錄，集中在同一個專案。</p></div></header>${D.empty('目前沒有可查看的工程',D.role==='employee'&&!isEngineer()?'此員工目前是行政職務。先完成「人事異動」示例，改為工程助理後，才可查看指派給他的工程。':'目前公司或身分沒有指派的工程；可切換工程主管查看示例。')}`;
-    const p=rows.find(x=>x.id===params.id)||rows[0], tab=params.tab||'work', progress=Math.round(p.work.reduce((sum,w)=>sum+w.progress,0)/p.work.length);
+    const p=rows.find(x=>x.id===params.id)||rows[0], tab=params.tab||'work', progress=(p.work.length?Math.round(p.work.reduce((sum,w)=>sum+w.progress,0)/p.work.length):0);
     const tabs=[['work','工作進度'],['files','相關文件'],['budget','預算與費用'],['history','變更紀錄']];
     let html=`<header class="page-head"><div><p class="eyebrow">工程與採購 / 工程與專案</p><h1>${E(p.name)}</h1><p class="lede">${E(p.company)} · ${E(p.site)} · 工程主管 ${E(name(p.managerId))}</p></div></header><section class="grid three"><div class="card stat"><span class="muted">工作進度</span><strong>${progress}%</strong><span class="mini">依各項工作回報概況</span></div><div class="card stat"><span class="muted">需跟進</span><strong>${p.work.filter(w=>w.status!=='accepted'&&D.daysUntil(w.due)<0).length} 項逾期</strong><span class="mini">到期提醒顯示在工作首頁</span></div><div class="card stat"><span class="muted">等待驗收</span><strong>${p.work.filter(w=>w.status==='inspection').length} 項</strong><span class="mini">通過後保留回報與驗收紀錄</span></div></section><nav class="subnav">${tabs.map(([id,label])=>`<button class="btn${tab===id?' primary':''}" data-action="project-tab" data-id="${p.id}" data-tab="${id}">${label}</button>`).join('')}</nav>`;
     if(tab==='files') html+=`<section class="card"><h2>大家查看同一個最新版本</h2><p class="muted">按圖面分類；新版取代舊版的顯示位置，舊版與修改說明仍保留。以下為文字示例，並非實際圖檔。</p></section><div class="grid three">${p.documents.map(d=>`<article class="card stack"><span class="eyebrow">${E(d.category)}</span><h3>${E(d.name)}</h3>${D.badge('最新版 '+d.versions[0].version,'blue')}<p>${E(d.versions[0].change)}</p><p class="mini">${E(d.versions[0].date)} · ${E(d.versions[0].author)}</p><div class="action-row">${button('查看最新版','project-file',p.id,`data-file="${d.id}" data-version="0"`,true)}${button('版本紀錄','project-versions',p.id,`data-file="${d.id}"`)}${mayManage(p)?button('登記新版示例','project-new-version',p.id,`data-file="${d.id}"`):''}</div></article>`).join('')}</div>`;
+    else if(tab==='budget'&&p.budget.provided===false)html+=`<section class="card"><h2>工程預算</h2><p>尚未提供預算表；目前沒有已確認金額。</p></section>`;
     else if(tab==='budget') html+=`<section class="card stack"><h2>查看既有預算表</h2><p>預算由原編製人員提供。這裡集中查看最新版與來源，不重新建立工程估價算法。</p><div class="row"><div><p class="eyebrow">${E(p.budget.author)} · ${E(p.budget.date)} · ${E(p.budget.version)}</p><div class="metric"><strong>${D.money(p.budget.total)}</strong></div><p class="mini">整份表內的預算總額示例，非已付款金額。</p></div>${button('打開預算表','project-budget',p.id,'',true)}</div></section>`;
     else if(tab==='history') html+=`<section class="card"><h2>誰在什麼時候改了什麼</h2><div class="timeline">${p.history.map(h=>`<article><strong>${E(h.text)}</strong><p class="mini">${E(h.at)} · ${E(h.actor)}</p></article>`).join('')}</div></section>`;
-    else html+=`<div class="notice blue">下一步：工程人員回報進度 → 工程主管驗收或退回。CEO／董事長可查看進度及提醒。驗收放在工作項目內，完成後也保留紀錄。</div><div class="grid two">${p.work.map(w=>workCard(p,w)).join('')}</div>`;
+    else html+=`${params.work?`<p><a href="#view=engineering&id=${E(p.id)}&tab=work">← 返回全部工作</a></p>`:''}<div class="grid two">${p.work.filter(w=>!params.work||w.id===params.work).map(w=>workCard(p,w)).join('')||D.empty(params.work?'這項工作不存在':'尚未建立工作','由工程主管新增工作並指派承辦人。')}</div>`;
     return html;
   }
   function lookup(el) { const p=find(el.dataset.id);if(!p||!mayRead(p))throw Error('目前身分無法查看此工程。');return p; }
@@ -65,6 +66,9 @@
     const body=`<p>${status(w)} · ${E(name(w.assigneeId))} · 預定 ${E(w.due)}</p>${editable?`<div class="form-grid"><label class="field">完成進度（%）<input name="progress" type="number" min="0" max="100" value="${w.progress}" required></label>${mayManage(p)?`<label class="field">預定完成日<input name="due" type="date" value="${w.due}" required></label>`:''}</div><h3>檢核點</h3>${w.checkpoints.map((c,i)=>`<label class="row"><input name="check${i}" type="checkbox" ${c.done?'checked':''}>${E(c.label)}</label>`).join('')}<label class="field">進度說明<textarea name="note" required maxlength="500">${E(w.note)}</textarea></label><label class="field">這次操作<select name="mode"><option value="save">只更新進度</option value="submit">回報完成，交主管驗收</option></select></label><p class="mini">完成回報需達 100% 並完成全部檢核點。承辦人或回報人不能自行驗收；需另一位主管驗收。</p>`:`<p>${E(w.note)}</p>`}${record}`;
     D.modal(w.title,body,editable?(v,form)=>{
       if(!mayUpdate(p,w)||['inspection','accepted'].includes(w.status))throw Error('這項工作目前不能修改。');
+      if(!String(v.note||'').trim())throw Error('請填寫進度說明。');
+      if(mayManage(p)&&(!/^\d{4}-\d{2}-\d{2}$/.test(v.due||'')||Number.isNaN(Date.parse(v.due+'T00:00:00Z'))||new Date(v.due+'T00:00:00Z').toISOString().slice(0,10)!==v.due))throw Error('請填寫有效的完成日期。');
+      if(!['save','submit'].includes(v.mode))throw Error('請選擇更新進度或提交驗收。');
       const progress=Number(v.progress);if(!Number.isFinite(progress)||progress<0||progress>100)throw Error('請填 0 至 100 的進度。');
       const checked=w.checkpoints.map((_,i)=>form.elements['check'+i].checked);
       if(v.mode==='submit'&&(progress!==100||checked.some(x=>!x)))throw Error('先完成全部檢核點，並將進度更新為 100%。');
@@ -76,7 +80,7 @@
   D.on('project-work',workModal);
   D.on('project-inspect',el=>{
     const p=lookup(el),w=p.work.find(x=>x.id===el.dataset.work);if(!mayInspect(p,w))throw Error('只有另一位主管可以驗收；承辦人或回報人不能自行驗收。');
-    D.modal('工作驗收',`<h3>${E(w.title)}</h3><p>${E(w.note)}</p><label class="field">驗收結果<select name="result"><option value="accepted">驗收通過</option><option value="returned">退回改善</option></select></label><label class="field">驗收依據／改善事項<textarea name="note" maxlength="500" required></textarea></label><p class="mini">會保存驗收人、結果與說明；原工作與回報不刪除。</p>`,v=>{if(!mayInspect(p,w))throw Error('需另一位主管驗收，或工作狀態已改變。');if(!['accepted','returned'].includes(v.result))throw Error('請選擇驗收通過或退回改善。');D.mutate(()=>{w.status=v.result;w.inspections.push({at:D.today,actorId:D.actor.id,actor:D.actor.name,result:v.result,note:v.note});event(p,`${w.title}：${v.result==='accepted'?'驗收通過':'退回改善'}。${v.note}`);});},'確認驗收');
+    D.modal('工作驗收',`<h3>${E(w.title)}</h3><p>${E(w.note)}</p><label class="field">驗收結果<select name="result"><option value="accepted">驗收通過</option><option value="returned">退回改善</option></select></label><label class="field">驗收依據／改善事項<textarea name="note" maxlength="500" required></textarea></label><p class="mini">會保存驗收人、結果與說明；原工作與回報不刪除。</p>`,v=>{if(!mayInspect(p,w))throw Error('需另一位主管驗收，或工作狀態已改變。');if(!['accepted','returned'].includes(v.result))throw Error('請選擇驗收通過或退回改善。');if(!v.note?.trim())throw Error('請填寫驗收依據或改善事項。');D.mutate(()=>{w.status=v.result;w.inspections.push({at:D.today,actorId:D.actor.id,actor:D.actor.name,result:v.result,note:v.note});event(p,`${w.title}：${v.result==='accepted'?'驗收通過':'退回改善'}。${v.note}`);});},'確認驗收');
   });
   D.on('project-file',el=>{
     const p=lookup(el),doc=p.documents.find(x=>x.id===el.dataset.file),v=doc?.versions[Number(el.dataset.version||0)];if(!v)throw Error('找不到文件版本。');
@@ -93,8 +97,10 @@
   D.on('project-budget',el=>{
     const p=lookup(el),b=p.budget;D.modal('工程預算表｜'+b.version,`<p class="notice blue">示例既有預算表。僅呈現編製人提供的金額，不執行估價、付款或會計入帳。</p><p>${E(b.author)} · ${E(b.date)}</p><div class="table-wrap"><table><thead><tr><th>預算項目</th><th>USD</th></tr></thead><tbody>${b.rows.map(([title,amount])=>`<tr><td>${E(title)}</td><td>${D.money(amount)}</td></tr>`).join('')}<tr><th>原表列示總額</th><th>${D.money(b.total)}</th></tr></tbody></table></div>`,null);
   });
-  D.projectInbox = role => {
-    if(!['manager','employee','admin','ceo','chairman'].includes(role))return [];
-    return projects().filter(mayRead).flatMap(p=>p.work.filter(w=>w.status!=='accepted'&&(role!=='employee'||(isEngineer()&&w.assigneeId===D.actor.id))).filter(w=>w.status==='inspection'||D.daysUntil(w.due)<=2).map(w=>({id:w.id,company:p.company,title:w.title,detail:`${statusText[w.status]} · ${due(w)} · ${name(w.assigneeId)}`,view:'engineering',params:{id:p.id},actionLabel:mayInspect(p,w)?'前往驗收':'查看工作',status:w.status})));
+  D.projectInbox = (role=D.role) => {
+    if(!['manager','employee','admin'].includes(role))return [];
+    return projects().filter(mayRead).flatMap(p=>p.work.filter(w=>mayInspect(p,w)||['working','returned'].includes(w.status)&&mayUpdate(p,w)&&(w.assigneeId===D.actor.id||w.status==='returned'||D.daysUntil(w.due)<=2)).map(w=>({id:w.id,company:p.company,title:w.title,detail:`${statusText[w.status]} · ${due(w)} · ${name(w.assigneeId)}`,view:'engineering',params:{id:p.id,tab:'work',work:w.id},actionLabel:mayInspect(p,w)?'驗收工作':w.status==='returned'?'回報改善':'更新工作',status:w.status})));
   };
+  D.projectResults=()=>projects().filter(mayRead).flatMap(p=>p.work.filter(w=>w.status==='accepted'&&w.assigneeId===D.actor.id).map(w=>({id:w.id,company:p.company,title:w.title,detail:'工作已通過驗收，回報與驗收紀錄已保留。',view:'engineering',params:{id:p.id,tab:'work',work:w.id},status:w.status,actionLabel:'查看驗收結果'})));
+
 })();
