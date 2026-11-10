@@ -85,7 +85,9 @@
  }});
  const home=D.modules.home;
  if(home){const previous=home.render;home.render=function(...args){
-  const html=previous.apply(this,args),items=D.notifications().filter(n=>n.kind==='document'||n.kind==='result'&&n.actionable);
+  const html=previous.apply(this,args);
+  if(D.managementOverview&&['ceo','chairman','admin'].includes(D.role)&&args[0]?.dashboard!=='work')return html;
+  const items=D.notifications().filter(n=>n.kind==='document'||n.kind==='result'&&n.actionable);
   const block=`<section class="card personal-reminders"><div class="section-title"><div><p class="eyebrow">${E(D.actor.name)} · 流程示例</p><h2>${staff()?'證件與個人提醒':'我的提醒'}</h2></div><a class="btn" href="#view=notifications&filter=action">查看所有通知</a></div><div class="reminder-grid">${rows(items.slice(0,3),true)}</div>${items.length>3?`<p class="muted">還有 ${items.length-3} 則提醒，可在通知中心查看。</p>`:''}</section>`;
   const header=html.match(/^<div class="page-head">[\s\S]*?<\/div><\/div>/)?.[0];
   const at=header?header.length:html.indexOf('</header>')+9;return at<9?block+html:html.slice(0,at)+block+html.slice(at);

@@ -4,7 +4,7 @@
  const D=window.D,E=v=>D.esc(v??''),all=Object.keys(D.roles);
  const kinds={leave:'請假',cancel:'銷假',overtime:'加班',field:'外勤'};
  const statuses={draft:'草稿',review:'待主管複核',approval:'待核准',approved:'已核准',returned:'退回修改',withdrawn:'已撤回',cancelled:'已銷假'};
- const leaveTypes={annual:'年假',personal:'事假',sick:'病假'};
+ const leaveTypes=D.leaveRules?.types||{annual:'年假',personal:'事假',sick:'病假'};
  const head=(title,text,actions='')=>`<header class="page-head"><div><p class="eyebrow">行政人事</p><h1>${E(title)}</h1><p class="lede">${E(text)}</p></div>${actions}</header>`;
  const btn=(title,action,id='',primary=false)=>`<button class="btn${primary?' primary':''}" data-action="${action}" data-id="${E(id)}">${E(title)}</button>`;
  const link=(title,view,params={})=>`<a class="btn" href="#${new URLSearchParams({view,...params})}">${E(title)}</a>`;
@@ -28,6 +28,7 @@
   return x;
  }
  function seed(s){
+  D.leaveRules?.seed(s);
   s.leaveRequests??=[];
   s.leaveRequests.forEach(normalize);
   if(s.leaveExamplesVersion===1)return;
@@ -43,8 +44,9 @@
   }
   s.leaveExamplesVersion=1;
  }
- function visible(x){return !!x&&sameCompany(x)&&(owned(x)||!['draft','withdrawn'].includes(x.status)&&(x.reviewer===D.role||x.approver===D.role));}
+ function visible(x){if(D.leaveRules)return D.leaveRules.visible(x);return !!x&&sameCompany(x)&&(owned(x)||!['draft','withdrawn'].includes(x.status)&&(x.reviewer===D.role||x.approver===D.role));}
  function actions(x){
+  if(D.leaveRules)return D.leaveRules.actions(x);
   if(!visible(x))return [];
   if(owned(x))return ['draft','returned'].includes(x.status)?['edit','submit','withdraw']:isPending(x)?['withdraw']:x.status==='approved'&&x.kind==='leave'?['cancel']:[];
   if(x.status==='review'&&x.reviewer===D.role)return ['review','return'];
@@ -60,6 +62,7 @@
   return original;
  }
  function transition(id,action,note=''){
+  if(D.leaveRules)return D.leaveRules.transition(id,action,note);
   const x=D.state.leaveRequests.find(r=>r.id===id);
   if(!x||!actions(x).includes(action))throw Error('目前身分或公司不能執行這一步。');
   if(action==='return'&&!String(note).trim())throw Error('請填寫退回原因。');
@@ -70,7 +73,7 @@
    if(action==='approve'){x.status='approved';x.approvedBy=D.actor.id;if(x.kind==='cancel'){const original=sourceLeave(x);original.status='cancelled';original.cancelledBy=x.id;addHistory(original,'已核准銷假',x.id);}}
    if(action==='return')x.status='returned';
    if(action==='withdraw')x.status='withdrawn';
-   addHistory(x,({submit:'送交主管複核',review:'複核通過，送交核准',approve:'核准',return:'退回修改',withdraw:'撤回申請'})[action],note);
+   addHistory(x,({submit:D.leaveRules?'送出申請':'送交主管複核',review:'複核通過，送交核准',approve:'核准',return:'退回修改',withdraw:'撤回申請'})[action],note);
   });
   return x;
  }
@@ -80,8 +83,8 @@
   if(!validDate(v.startDate)||!validDate(v.endDate)||v.endDate<v.startDate)throw Error('請填寫有效的開始與結束日期。');
   if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(v.startTime||'')||!/^([01]\d|2[0-3]):[0-5]\d$/.test(v.endTime||''))throw Error('請填寫有效的開始與結束時間。');
   const elapsed=(Date.parse(v.endDate+'T'+v.endTime+':00Z')-Date.parse(v.startDate+'T'+v.startTime+':00Z'))/3600000;
-  if(elapsed<=0||elapsed>744)throw Error('結束時間須晚於開始時間，單次申請最多 31 天。');
-  const hours=Number(v.hours);if(!Number.isFinite(hours)||hours<=0||hours>elapsed||hours>248)throw Error('申請時數須大於零，且不可超過所選期間。');
+  if(elapsed<=0||elapsed>(D.leaveRules?8784:744))throw Error('請核對申請期間，結束時間須晚於開始時間。');
+  const hours=Number(v.hours);if(!Number.isFinite(hours)||hours<=0||hours>elapsed||hours>(D.leaveRules?8784:248))throw Error('申請時數須大於零，且不可超過所選期間。');
   return hours;
  }
  function form(kind,item=null,cancelOf=''){
@@ -91,23 +94,25 @@
   const originals=D.state.leaveRequests.filter(x=>sameCompany(x)&&owned(x)&&x.kind==='leave'&&x.status==='approved');
   if(kind==='cancel'&&!originals.length)throw Error('目前沒有可銷假的已核准請假。');
   const value=item||{startDate:D.dateAdd(D.today,1),endDate:D.dateAdd(D.today,1),startTime:kind==='overtime'?'18:00':'09:00',endTime:kind==='overtime'?'20:00':'17:00',hours:kind==='overtime'?2:8,leaveType:'annual',cancelOf:cancelOf||originals[0]?.id};
-  const fields=kind==='cancel'?`<label class="field full">要銷假的原申請${D.select('cancelOf',originals.map(x=>[x.id,`${x.startDate} · ${leaveTypes[x.leaveType]||'請假'} · ${x.hours} 小時 · ${x.id}`]),value.cancelOf)}</label><p class="mini">銷回整筆申請，保留原請假與審核紀錄。</p>`:`${kind==='leave'?`<label class="field full">假別${D.select('leaveType',Object.entries(leaveTypes),value.leaveType)}</label>`:''}<label class="field">開始日期<input name="startDate" type="date" value="${E(value.startDate)}" required></label><label class="field">結束日期<input name="endDate" type="date" value="${E(value.endDate)}" required></label><label class="field">開始時間<input name="startTime" type="time" value="${E(value.startTime)}" required></label><label class="field">結束時間<input name="endTime" type="time" value="${E(value.endTime)}" required></label><label class="field">申請時數<input name="hours" type="number" value="${E(value.hours)}" min="0.5" max="248" step="0.5" required></label>${kind==='field'?`<label class="field">外勤地點<input name="location" value="${E(value.location)}" maxlength="160" required></label><label class="field full">工作項目<input name="project" value="${E(value.project)}" maxlength="160" required></label>`:''}`;
-  D.modal(`${item?'修改':'新增'}${kinds[kind]}申請`, `<div class="form-grid">${fields}<label class="field full">${kind==='overtime'?'加班工作與預期成果':kind==='field'?'外勤目的':kind==='cancel'?'銷假原因':'請假事由'}<textarea name="reason" maxlength="1000" required>${E(value.reason)}</textarea></label><label class="field full">交接安排<textarea name="handover" maxlength="1000" required>${E(value.handover)}</textarea></label></div><p class="mini">儲存草稿後送交複核。</p>`,v=>{
+  const fields=kind==='cancel'?`<label class="field full">要銷假的原申請${D.select('cancelOf',originals.map(x=>[x.id,`${x.startDate} · ${leaveTypes[x.leaveType]||'請假'} · ${x.hours} 小時 · ${x.id}`]),value.cancelOf)}</label><p class="mini">銷回整筆申請，保留原請假與審核紀錄。</p>`:`${kind==='leave'?`<label class="field full">假別${D.select('leaveType',Object.entries(D.leaveRules?.typeOptions(company)||leaveTypes),value.leaveType)}</label>`:''}<label class="field">開始日期<input name="startDate" type="date" value="${E(value.startDate)}" required></label><label class="field">結束日期<input name="endDate" type="date" value="${E(value.endDate)}" required></label><label class="field">開始時間<input name="startTime" type="time" value="${E(value.startTime)}" required></label><label class="field">結束時間<input name="endTime" type="time" value="${E(value.endTime)}" required></label><label class="field">申請時數<input name="hours" type="number" value="${E(value.hours)}" min="0.5" max="${D.leaveRules?8784:248}" step="0.5" required></label>${kind==='field'?`<label class="field">外勤地點<input name="location" value="${E(value.location)}" maxlength="160" required></label><label class="field full">工作項目<input name="project" value="${E(value.project)}" maxlength="160" required></label>`:''}`;
+  D.modal(`${item?'修改':'新增'}${kinds[kind]}申請`, `<div class="form-grid">${fields}${D.leaveRules?.extraFields(value)||''}<label class="field full">${kind==='overtime'?'加班工作與預期成果':kind==='field'?'外勤目的':kind==='cancel'?'銷假原因':'請假事由'}<textarea name="reason" maxlength="1000" required>${E(value.reason)}</textarea></label><label class="field full">交接安排<textarea name="handover" maxlength="1000" required>${E(value.handover)}</textarea></label></div><p class="mini">儲存草稿後送交複核。</p>`,v=>{
    if(D.company!==company||D.actor.id!==actor||item&&!actions(item).includes('edit'))throw Error('身分、公司或申請狀態已改變，請重新開啟。');
    if(!String(v.reason||'').trim()||!String(v.handover||'').trim())throw Error('請填寫事由與交接安排。');
    if(kind==='leave'&&!leaveTypes[v.leaveType])throw Error('請選擇假別。');
    if(kind==='field'&&(!String(v.location||'').trim()||!String(v.project||'').trim()))throw Error('請填寫外勤地點與工作項目。');
-   const patch={kind,reason:v.reason.trim(),handover:v.handover.trim()};
+   const patch={kind,reason:v.reason.trim(),handover:v.handover.trim(),evidenceUrl:v.evidenceUrl?.trim()||''};
    if(kind==='cancel'){
     const original=originals.find(x=>x.id===v.cancelOf);if(!original||original.status!=='approved')throw Error('請選擇本人已核准的請假。');
     Object.assign(patch,{cancelOf:original.id,date:original.startDate,startDate:original.startDate,endDate:original.endDate,startTime:original.startTime,endTime:original.endTime,hours:original.hours,leaveType:original.leaveType});
    }else Object.assign(patch,{startDate:v.startDate,endDate:v.endDate,date:v.startDate,startTime:v.startTime,endTime:v.endTime,hours:times(v),leaveType:kind==='leave'?v.leaveType:'',location:kind==='field'?v.location.trim():'',project:kind==='field'?v.project.trim():''});
    const x=item||{id:'REQ-'+Date.now()+'-'+Math.random().toString(36).slice(2,6),company,employeeId:actor,employeeName:D.actor.name,status:'draft',flowVersion:1,...routeFor(D.role),history:[]};
    if(kind==='cancel')validateCancellation({...x,...patch});
+   D.leaveRules?.validateDraft({...x,...patch});
+   if(item)D.leaveRules?.assertOpenPeriod(item);D.leaveRules?.assertOpenPeriod({...x,...patch});
    D.mutate(s=>{Object.assign(x,patch);if(!item)s.leaveRequests.push(x);addHistory(x,'儲存草稿');});D.go('leave',{id:x.id});
   },'儲存草稿');
  }
- const actionTitles={edit:'修改內容',submit:'送交主管複核',review:'複核通過',approve:'核准',return:'退回修改',withdraw:'撤回申請',cancel:'申請銷假'};
+ const actionTitles={edit:'修改內容',submit:D.leaveRules?'送出申請':'送交主管複核',review:'複核通過',approve:'核准',return:'退回修改',withdraw:'撤回申請',cancel:'申請銷假'};
  for(const a of Object.keys(actionTitles))D.on('leave-demo-'+a,el=>{
   const x=D.state.leaveRequests.find(p=>p.id===el.dataset.id);if(!x||!actions(x).includes(a))throw Error('目前身分或公司不能執行這一步。');
   if(a==='edit')return form(x.kind,x);if(a==='cancel')return form('cancel',null,x.id);
@@ -124,20 +129,21 @@
  function history(x){return `<section class="card space-top"><h2>處理紀錄</h2><div class="timeline">${x.history.map(h=>`<article><strong>${E(h.action)}</strong><p class="mini">${E(h.actor)} · ${E(h.at)}</p><p>${E(h.note)}</p></article>`).join('')||'<p class="muted">草稿尚未送出。</p>'}</div></section>`;}
  function rowCard(x){const direct=actions(x).filter(a=>['edit','submit','review','approve','return'].includes(a));return `<article class="card"><div class="row"><span class="eyebrow">${E(kinds[x.kind])} · ${E(x.id)}</span>${D.badge(statuses[x.status]||x.status,x.status==='approved'?'green':x.status==='returned'?'amber':'blue')}</div><h3>${E(x.employeeName)} · ${x.kind==='leave'?E(leaveTypes[x.leaveType]||'請假'):E(kinds[x.kind])}</h3><p>${E(x.startDate)}${x.endDate!==x.startDate?' — '+E(x.endDate):''} · ${E(x.hours)} 小時</p><p class="muted">${E(x.reason)}</p>${x.status==='returned'?`<p class="notice amber">退回原因：${E(x.history.at(-1)?.note||'請查看處理紀錄並補充內容。')}</p>`:''}<div class="action-row">${direct.map(a=>btn(actionTitles[a],'leave-demo-'+a,x.id,['submit','review','approve'].includes(a))).join('')}${link(['approved','cancelled'].includes(x.status)?'查看核准結果':'申請明細','leave',{id:x.id})}</div></article>`;}
  function detail(x){
-  const next=x.status==='review'?x.reviewer:x.status==='approval'?x.approver:null;
-  return head(`${kinds[x.kind]}申請`,`${x.id} · ${x.company} · ${x.employeeName}`,link('返回假勤清單','leave'))+`<section class="card"><div class="row"><h2>${E(x.kind==='leave'?leaveTypes[x.leaveType]:kinds[x.kind])}</h2>${D.badge(statuses[x.status],x.status==='approved'?'green':x.status==='returned'?'amber':'blue')}</div><ol class="steps">${['填寫申請','主管複核','核准結果'].map(t=>`<li class="step">${t}</li>`).join('')}</ol><div class="grid two"><p><strong>期間</strong><br>${E(x.startDate)} ${E(x.startTime)} — ${E(x.endDate)} ${E(x.endTime)}</p><p><strong>申請時數</strong><br>${E(x.hours)} 小時</p><p><strong>事由</strong><br>${E(x.reason)}</p><p><strong>交接安排</strong><br>${E(x.handover)}</p>${x.kind==='field'?`<p><strong>外勤地點</strong><br>${E(x.location)}</p><p><strong>工作項目</strong><br>${E(x.project)}</p>`:''}</div>${x.cancelOf?`<p>原請假：${link('查看原申請','leave',{id:x.cancelOf})}</p>`:''}<div class="action-row">${actions(x).map(a=>btn(actionTitles[a],'leave-demo-'+a,x.id,['submit','review','approve'].includes(a))).join('')}</div>${next?`<div class="notice blue">下一步：${E(D.roles[next]?.label)}${D.role!==next?` <button class="btn" data-action="switch-role" data-role="${E(next)}" data-view="leave" data-id="${E(x.id)}">切換查看處理人</button>`:''}</div>`:''}</section>${history(x)}${boundary}`;
+  const next=D.leaveRules?D.leaveRules.current(x):x.status==='review'?x.reviewer:x.status==='approval'?x.approver:null;
+  return head(`${kinds[x.kind]}申請`,`${x.id} · ${x.company} · ${x.employeeName}`,link('返回假勤清單','leave'))+`<section class="card"><div class="row"><h2>${E(x.kind==='leave'?leaveTypes[x.leaveType]:kinds[x.kind])}</h2>${D.badge(statuses[x.status],x.status==='approved'?'green':x.status==='returned'?'amber':'blue')}</div>${D.leaveRules?D.leaveRules.stepsHTML(x):`<ol class="steps">${['填寫申請','主管複核','核准結果'].map(t=>`<li class="step">${t}</li>`).join('')}</ol>`}<div class="grid two"><p><strong>期間</strong><br>${E(x.startDate)} ${E(x.startTime)} — ${E(x.endDate)} ${E(x.endTime)}</p><p><strong>申請時數</strong><br>${E(x.hours)} 小時</p><p><strong>事由</strong><br>${E(x.reason)}</p><p><strong>交接安排</strong><br>${E(x.handover)}</p>${x.kind==='field'?`<p><strong>外勤地點</strong><br>${E(x.location)}</p><p><strong>工作項目</strong><br>${E(x.project)}</p>`:''}</div>${x.evidenceUrl&&/^https:\/\//.test(x.evidenceUrl)?`<p><a class="btn" href="${E(x.evidenceUrl)}" target="_blank" rel="noopener noreferrer">開啟佐證連結</a></p>`:''}${x.cancelOf?`<p>原請假：${link('查看原申請','leave',{id:x.cancelOf})}</p>`:''}<div class="action-row">${actions(x).map(a=>btn(actionTitles[a],'leave-demo-'+a,x.id,['submit','review','approve'].includes(a))).join('')}</div>${next?`<div class="notice blue">下一步：${E(D.roles[next]?.label)}${D.role!==next?` <button class="btn" data-action="switch-role" data-role="${E(next)}" data-view="leave" data-id="${E(x.id)}">切換查看處理人</button>`:''}</div>`:''}</section>${history(x)}${boundary}`;
  }
  function balances(){
+  if(D.leaveRules)return D.leaveRules.balanceHTML();
   const rows=D.state.leaveRequests.filter(x=>sameCompany(x)&&owned(x)&&x.kind==='leave'),allocation=96;
   const used=rows.filter(x=>x.leaveType==='annual'&&x.status==='approved').reduce((n,x)=>n+amount(x),0),pending=rows.filter(x=>x.leaveType==='annual'&&isPending(x)).reduce((n,x)=>n+amount(x),0);
   return `<section class="card"><h2>我的年假餘額</h2><p class="muted">年度額度 96 小時；已核准申請計入已用，處理中的申請先預留。</p><div class="grid four"><div class="stat"><small>年度額度</small><strong>${allocation}h</strong></div><div class="stat"><small>已核准使用</small><strong>${used}h</strong></div><div class="stat"><small>申請中預留</small><strong>${pending}h</strong></div><div class="stat"><small>目前可用</small><strong>${Math.max(0,allocation-used-pending)}h</strong></div></div>${allocation-used-pending<0?'<p class="notice amber">申請時數超過目前可用額度，請聯絡人資確認。</p>':''}<p class="mini">核准銷假後，原請假標示「已銷假」，時數退回可用額度。</p></section><div class="section-title"><h2>餘額來源明細</h2></div><div class="grid two">${rows.filter(x=>x.leaveType==='annual'&&['approved','cancelled','review','approval'].includes(x.status)).map(rowCard).join('')||D.empty('尚無年假使用紀錄')}</div>`;
  }
  function renderLeave(r={}){
   const id=r.id||r.detail;if(id){const x=D.state.leaveRequests.find(x=>x.id===id);return visible(x)?detail(x):head('假勤申請','依本人及指定審核範圍查看。',link('返回假勤清單','leave'))+D.empty('此申請不在目前可見範圍');}
-  const tab=['all',...Object.keys(kinds),'review','balance'].includes(r.tab)?r.tab:'all';
-  const nav=`<nav class="subnav">${[['all','全部申請'],...Object.entries(kinds),['review','待我處理'],['balance','我的餘額']].map(([k,t])=>`<a class="${tab===k?'active':''}" href="#view=leave&tab=${k}">${E(t)}</a>`).join('')}</nav>`;
+  const tab=['all',...Object.keys(kinds),'review','balance',...(D.leaveRules?.canEdit()?['policy']:[])].includes(r.tab)?r.tab:'all';
+  const nav=`<nav class="subnav">${[['all','全部申請'],...Object.entries(kinds),['review','待我處理'],['balance','我的餘額'],...(D.leaveRules?.canEdit()?[['policy','假別與簽核設定']]:[])].map(([k,t])=>`<a class="${tab===k?'active':''}" href="#view=leave&tab=${k}">${E(t)}</a>`).join('')}</nav>`;
   const rows=D.state.leaveRequests.filter(visible).filter(x=>tab==='review'?actions(x).some(a=>['review','approve','return'].includes(a)):tab==='all'?owned(x):x.kind===tab&&owned(x));
-  return head('假勤申請','選擇申請類型，填寫後送出；主管在自己的待辦複核，再交核准人。')+cards()+nav+(tab==='balance'?balances():`<div class="grid two">${rows.map(rowCard).join('')||D.empty(tab==='review'?'目前沒有待你處理的假勤':'目前沒有這類申請','可從上方新增一筆，儲存草稿後再送交複核。')}</div>`)+boundary;
+  return head('假勤申請','選擇申請類型，填寫後送出；處理人會依簽核順序收到待辦。')+cards()+nav+(tab==='policy'?D.leaveRules.policyHTML():tab==='balance'?balances():`<div class="grid two">${rows.map(rowCard).join('')||D.empty(tab==='review'?'目前沒有待你處理的假勤':'目前沒有這類申請','可從上方新增一筆，儲存草稿後再送交複核。')}</div>`)+boundary;
  }
  const prevLeave=D.modules.leave;
  D.register('leave',{...prevLeave,pending:false,seed,render:renderLeave});

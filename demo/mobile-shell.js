@@ -53,7 +53,14 @@
   return `<header class="phone-home-heading"><p>${E(D.company)} · ${D.today}</p><h1>${executive?'營運總覽':'今天的工作'}</h1></header><div class="phone-overview"><button data-action="mobile-nav" data-view="approvals"><span>待我處理</span><strong>${tasks.length}</strong><small>開啟待辦 ${icon('next')}</small></button><button data-action="mobile-nav" data-view="notifications"><span>未讀通知</span><strong>${notes.filter(n=>n.unread).length}</strong><small>查看提醒 ${icon('next')}</small></button></div>${urgent.length?`<section class="phone-alert"><span class="phone-alert-mark">!</span><div><strong>${E(urgent[0].title)}</strong><p>${urgent.length>1?'另有 '+(urgent.length-1)+' 筆證件提醒':'請確認續辦進度'}</p></div><button class="phone-icon" data-action="notification-open" data-id="${E(urgent[0].id)}" aria-label="開啟證件提醒">${icon('next')}</button></section>`:''}${overview}<section class="phone-section"><div class="section-title"><h2>我的待辦</h2><button class="text-button" data-action="mobile-nav" data-view="approvals">全部 ${tasks.length} 筆</button></div>${tasks.length?tasks.slice(0,4).map(x=>`<article class="phone-task"><div><h3>${E(x.title)}</h3><p>${E(x.detail||x.subtitle||'')}</p></div><button class="btn primary" data-action="mobile-nav" data-view="${E(x.view)}" data-params="${E(JSON.stringify(x.params||{id:x.id||''}))}">${E(x.actionLabel||'處理')}</button></article>`).join(''):D.empty('目前沒有待辦')}</section><section class="phone-section"><div class="section-title"><h2>常用功能</h2><button class="text-button" data-action="mobile-modules">全部模組</button></div><div class="phone-shortcuts">${shortcuts.map(([view,label,short])=>`<button data-action="mobile-nav" data-view="${view}"><span>${short}</span><strong>${label}</strong></button>`).join('')}</div></section>`;
  }
  const home=D.modules.home,oldHome=home?.render;
- if(home)home.render=function(...args){return D.mobileActive?phoneHome():oldHome.apply(this,args);};
+ if(home)home.render=function(...args){
+  if(!D.mobileActive)return oldHome.apply(this,args);
+  if(D.managementOverview&&['ceo','chairman','admin'].includes(D.role)){
+   if(['management','deng'].includes(args[0]?.dashboard))return oldHome.apply(this,args);
+   return '<div class="action-row"><a class="btn" href="#view=home&dashboard=management">管理總覽</a><a class="btn" href="#view=home&dashboard=deng">鄧總專屬 Dashboard</a></div>'+phoneHome();
+  }
+  return phoneHome();
+ };
  const oldRender=D.render.bind(D);D.render=function(...args){document.body.classList.toggle('mobile-mode',D.mobileActive);const out=oldRender(...args);header();D.mobileTables?.();return out;};
  const oldModal=D.modal.bind(D);D.modal=function(...args){D.mobileDirty=false;oldModal(...args);editingHash=typeof args[2]==='function'?location.hash:null;document.querySelector('#modal')?.classList.toggle('phone-edit-dialog',D.mobileActive&&typeof args[2]==='function');D.mobileTables?.();};
  const oldClose=D.closeModal.bind(D);D.closeModal=function(){D.mobileDirty=false;editingHash=null;document.querySelector('#modal')?.classList.remove('phone-role-sheet','phone-edit-dialog');return oldClose();};
