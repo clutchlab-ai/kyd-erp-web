@@ -71,7 +71,7 @@
  const oldLeave=D.modules.leave.render;
  D.modules.leave.render=r=>oldLeave(r)+(team()&&!r?.id?`<div class="action-row space-top">${link('全員假勤與工時','attendance',{tab:'summary'})}${link('可視化班表','attendance',{tab:'calendar'})}</div>`:'');
  const docTypes=[['labor','勞動合約'],['passport','護照'],['permit','工作許可'],['visa','簽證'],['nda','保密協議']];
- function documentRows(r){return filteredPeople(r).map(p=>({p,docs:docTypes.map(([type,label])=>({type,label,doc:D.state.hrDocuments.find(d=>d.company===p.company&&d.employeeId===p.id&&d.type===type)}))}));}
+ function documentRows(r){return filteredPeople(r).filter(p=>D.role!=='manager'||p.id===D.actor.id).filter(p=>!r.employeeId||p.id===r.employeeId).map(p=>({p,docs:docTypes.map(([type,label])=>({type,label,doc:D.state.hrDocuments.find(d=>d.company===p.company&&d.employeeId===p.id&&d.type===type&&!d.supersededBy)}))}));}
  function docStatus(d){if(!d)return ['未登錄','amber'];if(!d.expiresOn)return ['已留存','blue'];const days=D.daysUntil(d.expiresOn);return days<0?['已到期','red']:days<=(D.state.adminDemoSettings?.documentReminderDays??30)?['即將到期','amber']:['有效','green'];}
  function docOverview(r){
   if(!team())return D.empty('目前身分無法查看全員總表');
