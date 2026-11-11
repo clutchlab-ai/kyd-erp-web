@@ -1,4 +1,4 @@
-/* Phone presentation over the same isolated workflows. No network or device relay. */
+/* Phone presentation and shared form protection over the same isolated workflows. */
 (()=>{
  'use strict';
  const D=window.D,E=v=>D.esc(v??''),mq=window.matchMedia?.('(max-width: 760px)');
@@ -14,7 +14,7 @@
  const groups=['總覽','行政人事','採購與工程','財務會計','外部系統'];
  const navTo=(view,params={})=>{if(!D.allowed(view)){D.toast('目前角色無法使用此模組。');return;}D.closeModal();const before=location.hash;D.go(view,params);if(before===location.hash)D.render();};
  D.mobileConfirmDiscard=function(action){
-  if(D.mobileActive&&D.mobileDirty&&document.querySelector('#modal')?.open){pendingDiscard=action;document.querySelector('#mobile-discard')?.showModal();return false;}
+  if(D.mobileDirty&&document.querySelector('#modal')?.open){pendingDiscard=action;document.querySelector('#mobile-discard')?.showModal();return false;}
   action();return true;
  };
  D.mobileSelectRole=function(role){
@@ -63,6 +63,12 @@
  };
  const oldRender=D.render.bind(D);D.render=function(...args){document.body.classList.toggle('mobile-mode',D.mobileActive);const out=oldRender(...args);header();D.mobileTables?.();return out;};
  const oldModal=D.modal.bind(D);D.modal=function(...args){D.mobileDirty=false;oldModal(...args);editingHash=typeof args[2]==='function'?location.hash:null;document.querySelector('#modal')?.classList.toggle('phone-edit-dialog',D.mobileActive&&typeof args[2]==='function');D.mobileTables?.();};
+ // Desktop role changes use the same unsaved-form guard as the phone picker.
+ const oldSetRole=D.setRole.bind(D);D.setRole=function(role){
+  const result=D.mobileConfirmDiscard(()=>oldSetRole(role));
+  if(!result){const select=document.querySelector('#role-switch');if(select)select.value=D.role;}
+  return result;
+ };
  const oldClose=D.closeModal.bind(D);D.closeModal=function(){D.mobileDirty=false;editingHash=null;document.querySelector('#modal')?.classList.remove('phone-role-sheet','phone-edit-dialog');return oldClose();};
  D.on('mobile-role-picker',()=>D.mobileConfirmDiscard(rolePicker));
  D.on('mobile-role-select',el=>D.mobileSelectRole(el.dataset.role));
@@ -74,18 +80,24 @@
  D.on('mobile-discard-confirm',()=>{const action=pendingDiscard;pendingDiscard=null;document.querySelector('#mobile-discard')?.close();D.mobileDirty=false;action?.();});
  D.on('mobile-company',()=>{if(!['ceo','chairman','admin'].includes(D.role))return;D.mobileConfirmDiscard(()=>D.modal('查看公司',`<div class="stack">${['KYD','ZEUS'].map(c=>`<button class="btn ${c===D.company?'primary':''}" data-action="mobile-company-select" data-company="${c}">${c==='KYD'?'KYD':'Zeus Property Management'}</button>`).join('')}</div>`));});
  D.on('mobile-company-select',el=>{if(!['ceo','chairman','admin'].includes(D.role)||!['KYD','ZEUS'].includes(el.dataset.company))return;D.state.company=el.dataset.company;D.save();navTo('home');D.render();});
- document.querySelector('#modal-form')?.addEventListener('input',()=>{if(D.mobileActive&&document.querySelector('#modal')?.classList.contains('phone-edit-dialog'))D.mobileDirty=true;});
- document.querySelector('#modal-form')?.addEventListener('change',()=>{if(D.mobileActive&&document.querySelector('#modal')?.classList.contains('phone-edit-dialog'))D.mobileDirty=true;});
- document.querySelector('#modal')?.addEventListener('cancel',event=>{if(!D.mobileActive)return;event.preventDefault();D.mobileConfirmDiscard(()=>D.closeModal());});
+ document.querySelector('#modal-form')?.addEventListener('input',()=>{if(editingHash!==null&&document.querySelector('#modal')?.open)D.mobileDirty=true;});
+ document.querySelector('#modal-form')?.addEventListener('change',()=>{if(editingHash!==null&&document.querySelector('#modal')?.open)D.mobileDirty=true;});
+ document.querySelector('#modal')?.addEventListener('cancel',event=>{event.preventDefault();D.mobileConfirmDiscard(()=>D.closeModal());});
  document.querySelector('#mobile-discard')?.addEventListener('cancel',()=>{pendingDiscard=null;});
  // Registered before core.boot's hash listener, so browser Back cannot close an edited form first.
  window.addEventListener('hashchange',event=>{
-  if(!D.mobileActive||!D.mobileDirty||!document.querySelector('#modal')?.open)return;
+  if(!D.mobileDirty||!document.querySelector('#modal')?.open)return;
   event.stopImmediatePropagation();
   const destination=location.hash,origin=editingHash??(event.oldURL?new URL(event.oldURL).hash:'#view=home');
   if(destination===origin)return;
   history.replaceState(history.state,'',origin||'#view=home');
   D.mobileConfirmDiscard(()=>{D.closeModal();location.hash=destination;});
+ });
+ document.querySelector('#modal-form')?.addEventListener('click',event=>{
+  if(editingHash!==null&&event.target.closest?.('[data-action="kpi-add-goal"], [data-action="kpi-remove-goal"]'))D.mobileDirty=true;
+ });
+ window.addEventListener('beforeunload',event=>{
+  if(D.mobileDirty&&document.querySelector('#modal')?.open){event.preventDefault();event.returnValue='';}
  });
  mq?.addEventListener?.('change',()=>{D.mobileActive=forced||mq.matches;D.render();});
 })();

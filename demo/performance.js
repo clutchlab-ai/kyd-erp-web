@@ -32,7 +32,15 @@
   const pendingPolicy=p=>p.policyDraft||policy(p.company);
   const sourceTab=params=>['todo','results','policy'].includes(params?.tab)?params.tab:'plans';
   const tabParams=tab=>tab==='plans'?{}:{tab};
-  const subjects=company=>D.state.people.filter(s=>s.company===company&&s.active!==false&&s.id!==D.actor.id&&(s.managerId?s.managerId===D.actor.id:plans().some(p=>p.company===company&&p.employeeId===s.id&&p.managerId===D.actor.id)));
+  // A past assessment is not authority to create a new assessment after a transfer.
+  // These fallback departments are synthetic examples; explicit assignments take priority.
+  const assignedManager=(person,people=D.state.people)=>{
+    if(person.managerId)return person.managerId;
+    if(person.company!=='KYD')return '';
+    const id=person.department==='工程部'?'m01':['行政部','人事行政部'].includes(person.department)?'h02':'';
+    return id&&people.some(p=>p.id===id&&p.company===person.company&&p.active!==false)?id:'';
+  };
+  const subjects=company=>D.state.people.filter(s=>s.company===company&&s.active!==false&&s.id!==D.actor.id&&assignedManager(s)===D.actor.id);
   const next=p=>({draft:'主管設定工作目標、期間、評分尺度與比重，再送上層確認。',goals_review:'CEO 核對目標、期間及比重；需要補充可退回主管。',active:'主管依每項實際成果與依據評分，再交 CEO 評核。',review_returned:'主管依退回原因補充成果與評分依據，再次送出。',second_review:'CEO 核對成果，提供第二層評分與評語；可退回補充。',completed:'員工可查看兩層分數與紀錄；完成評核不會自動調薪。',void:'此份草稿已作廢，目標與處理紀錄仍保留。'})[p.status];
   const log=(p,text)=>{p.history.push({at:D.today,actor:D.actor.name,text});D.log(text);};
   const actionable=p=>canManage(p)&&['draft','active','review_returned'].includes(p.status)||canReview(p)&&['goals_review','second_review'].includes(p.status);
@@ -65,19 +73,40 @@
     }
     s.kpiExamplesVersion=1;
   }
-  function seed(s){
-    if(!s.kpiPlans){
-      s.kpiPolicy={configured:false,managerWeight:null,ceoWeight:null};
-      s.kpiPlans=[{id:'KPI-001',company:'KYD',employeeId:'e01',managerId:'m01',secondManagerId:'x01',title:'工作品質與協作｜示例考核',period:'2026 年 11 月',start:'2026-11-01',end:'2026-11-30',scoreMax:100,status:'draft',goals:[
+  const defaultPlan=()=>({id:'KPI-001',company:'KYD',employeeId:'e01',managerId:'m01',secondManagerId:'x01',title:'工作品質與協作｜示例考核',period:'2026 年 11 月',start:'2026-11-01',end:'2026-11-30',scoreMax:100,status:'draft',goals:[
         {id:'KG-1',category:'重要工作',title:'完成指定工作的檢核與回報',target:'依期限完成 3 項工作，每項附上檢核結果與待解決事項。',weight:50},
         {id:'KG-2',category:'例行工作',title:'維護文件最新版',target:'每週核對文件版本，發現差異時記錄來源與修改說明。',weight:30},
         {id:'KG-3',category:'專案工作',title:'完成跨部門交接',target:'列出交接項目、接手人與完成日，並取得接手人確認。',weight:20}
-      ],first:null,second:null,policy:null,history:[{at:'2026-11-04',actor:'示例工程主管',text:'建立示例目標草稿，尚未正式確認。'}]}];
+      ],first:null,second:null,policy:null,history:[{at:'2026-11-04',actor:'示例工程主管',text:'建立示例目標草稿，尚未正式確認。'}]});
+  function reconcileUntouchedExamples(s){
+    if(s.kpiAssignmentVersion>=2)return;
+    const baseline={people:s.people,kpiPlans:[defaultPlan()]};addExamples(baseline);
+    for(const expected of baseline.kpiPlans){
+      const p=s.kpiPlans.find(x=>x.id===expected.id),person=s.people.find(x=>x.id===expected.employeeId);
+      if(!p||!person||!['KPI-001','KPI-SAMPLE-SEP','KPI-SAMPLE-OCT'].includes(p.id))continue;
+      const next=assignedManager(person,s.people);
+      if(!next||next===p.managerId)continue;
+      // Update only byte-for-byte preset content (allow the old optional schema default).
+      // Submitted, edited or completed-by-user records keep their participants and history.
+      const clean={...p};if(clean.goalReturned===false)delete clean.goalReturned;
+      if(JSON.stringify(clean)!==JSON.stringify(expected))continue;
+      p.managerId=next;
+      const name=s.people.find(x=>x.id===next)?.name||next;
+      if(p.first)p.first.actor=name;
+      p.history=p.history.map(h=>({...h,actor:h.actor==='周以辰'?name:h.actor==='示例工程主管'?'示例人資主管':h.actor}));
+    }
+    s.kpiAssignmentVersion=2;
+  }
+  function seed(s){
+    if(!s.kpiPlans){
+      s.kpiPolicy={configured:false,managerWeight:null,ceoWeight:null};
+      s.kpiPlans=[defaultPlan()];
     }
     // Add only missing schema fields: keep every saved goal, score, policy snapshot and history entry.
     if(!s.kpiPolicies)s.kpiPolicies={KYD:{...(s.kpiPolicy||{configured:false,managerWeight:null,ceoWeight:null})}};
     if(!s.kpiPolicy)s.kpiPolicy={configured:false,managerWeight:null,ceoWeight:null};
     addExamples(s);
+    reconcileUntouchedExamples(s);
     for(const p of s.kpiPlans){p.scoreMax??=100;p.secondManagerId??='x01';p.history??=[];p.goalReturned??=p.status==='draft'&&p.history.at(-1)?.text?.startsWith('CEO 退回目標：')||false;}
   }
   function tabs(active='plans',rows=[]){return `<nav class="subnav">${[['plans','考核清單'],['todo',`待我處理 (${rows.filter(actionable).length})`],['results','考核結果'],['policy','合成規則']].map(([key,label])=>`<a class="${active===key?'active':''}" href="${href(tabParams(key))}">${label}</a>`).join('')}</nav>`;}
