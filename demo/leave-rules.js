@@ -73,13 +73,18 @@
   if(x.evidenceUrl){try{if(new URL(x.evidenceUrl).protocol!=='https:')throw Error();}catch{throw Error('佐證連結須使用 HTTPS。');}}
  }
  function history(x,action,note){x.history??=[];x.history.push({at:D.today,actor:D.actor.name,actorId:D.actor.id,action,note});D.log(x.id+' '+action);}
+ function assertNoOverlap(x){
+  if(x.kind!=='leave')return;
+  const start=r=>(r.startDate||r.date)+'T'+(r.startTime||'00:00'),end=r=>(r.endDate||r.date)+'T'+(r.endTime||'23:59');
+  if(D.state.leaveRequests.some(r=>r.id!==x.id&&r.company===x.company&&r.employeeId===x.employeeId&&r.kind==='leave'&&['review','approval','approved'].includes(r.status)&&start(r)<end(x)&&end(r)>start(x)))throw Error('請假期間重疊：同一時段已有待審或已核准請假，請先修改、撤回或銷假。');
+ }
  function transition(id,action,note=''){
   const x=D.state.leaveRequests.find(r=>r.id===id);if(!x||!actions(x).includes(action))throw Error('目前身分或公司不能執行這一步。');
   if(['submit','review','approve','withdraw'].includes(action))assertOpenPeriod(x);
   if(action==='return'&&!String(note).trim())throw Error('請填寫退回原因。');
   let chosen;
-  if(action==='submit'){validateDraft(x);chosen=route(x);capacity(x);}
-  if(['review','approve'].includes(action)){validateDraft(x);capacity(x);}
+  if(action==='submit'){validateDraft(x);chosen=route(x);assertNoOverlap(x);capacity(x);}
+  if(['review','approve'].includes(action)){validateDraft(x);assertNoOverlap(x);capacity(x);}
   if(x.kind==='cancel'&&['submit','review','approve'].includes(action)){
    if(original(x)?.status!=='approved'||D.state.leaveRequests.some(p=>p.id!==id&&p.cancelOf===x.cancelOf&&['review','approval','approved'].includes(p.status)))throw Error('原請假已銷假，或已有處理中的銷假申請。');
   }

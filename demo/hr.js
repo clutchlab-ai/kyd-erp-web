@@ -67,6 +67,13 @@
       if (!((D.role === 'hrmanager' && r.status === 'review') || (D.role === 'ceo' && r.status === 'approval'))) throw new Error('只有目前關卡的處理人可以退回。');
       if (!note.trim()) throw new Error('請填寫退回原因，讓申請人知道要補什麼。');
       r.status = 'returned'; logEvent(r,'退回人資修改',note);
+    } else if (action === 'reopen') {
+      if(D.role!=='hr'||r.status!=='approved')throw new Error('只有人資可將核准待生效的異動重新送審。');
+      if(!note.trim())throw new Error('請填寫重新送審原因。');
+      r.approvalHistory??=[];
+      r.approvalHistory.push({at:D.today,version:JSON.parse(JSON.stringify(r.approvedVersion)),reviewerId:r.reviewerId,approverId:r.approverId});
+      r.status='draft';delete r.approvedVersion;delete r.reviewerId;delete r.approverId;
+      logEvent(r,'重新送審，舊核准失效',note);
     } else if (action === 'apply') {
       if (D.role !== 'hr' || r.status !== 'approved') throw new Error('核准後由人資確認生效。');
       if (r.effectiveOn > D.today) throw new Error(`尚未到生效日 ${r.effectiveOn}。目前作業日期為 ${D.today}。`);
@@ -94,7 +101,7 @@
     if (['draft','returned'].includes(r.status)) return btn(r.status==='returned'?'補充申請':'填寫申請','hr-edit',r.id,true)+btn('送交人資主管複核','hr-submit',r.id);
     if (r.status === 'review') return btn('退回補充','hr-return',r.id)+btn('複核通過 → CEO','hr-review',r.id,true);
     if (r.status === 'approval') return btn('退回補充','hr-return',r.id)+btn('核准異動','hr-approve',r.id,true);
-    if (r.status === 'approved') return btn('確認生效與權限變更','hr-apply',r.id,true);
+    if (r.status === 'approved') return btn('確認生效與權限變更','hr-apply',r.id,true)+btn('重新送審','hr-reopen',r.id);
     return '';
   }
   function detail(r) {
@@ -129,9 +136,10 @@
   }
   function confirmTransition(action,id) {
     const r=request(id); if (!canSeeRequest(r)) {D.toast('無法開啟這筆異動。');return;}
-    const labels={submit:'送交人資主管複核',review:'複核通過',approve:'核准異動',apply:'確認異動生效',return:'退回人資補充'};
+    const labels={submit:'送交人資主管複核',review:'複核通過',approve:'核准異動',apply:'確認異動生效',return:'退回人資補充',reopen:'重新送審'};
     const body = action==='apply' ? `${impact(r)}<p><strong>確認後：</strong>${E(person(r.employeeId)?.name)} 會改為 ${E(profile(r.toProfile).title)}。</p>` : `<p>${E(person(r.employeeId)?.name)}：${E(r.fromTitle)} → <strong>${E(profile(r.toProfile).title)}</strong></p><p class="muted">${action==='approve'?'核准後狀態為待生效。':action==='return'?'請填寫退回原因。':''}</p>`;
-    D.modal(labels[action], body+`<label class="field full">${action==='return'?'退回原因（必填）':'處理備註（選填）'}<textarea name="note" rows="3" maxlength="500" ${action==='return'?'required':''}></textarea></label>`, values => {transition(id,action,values.note||'');D.render();D.toast(action==='apply'?'異動已生效。':'已完成處理。');},labels[action]);
+    const mustExplain=['return','reopen'].includes(action);
+    D.modal(labels[action], body+(action==='reopen'?'<p class="notice">原核准會失效，修改後須重新複核與核准；生效前不變更員工資料。</p>':'')+`<label class="field full">${action==='reopen'?'重新送審原因':action==='return'?'退回原因（必填）':'處理備註（選填）'}<textarea name="note" rows="3" maxlength="500" ${mustExplain?'required':''}></textarea></label>`, values => {transition(id,action,values.note||'');D.render();D.toast(action==='apply'?'異動已生效。':'已完成處理。');},labels[action]);
   }
   function documentStatus(doc) {
     if (!doc.expiresOn) return {label:'無固定到期日',tone:'neutral',days:null};
@@ -202,7 +210,7 @@
   D.register('access',{title:'職務權限紀錄',group:'行政人事',roles,render:renderAccess});
   D.on('hr-new',()=>editRequest(''));
   D.on('hr-edit',el=>editRequest(el.dataset.id));
-  for(const action of ['submit','review','approve','apply','return'])D.on(`hr-${action}`,el=>confirmTransition(action,el.dataset.id));
+  for(const action of ['submit','review','approve','apply','return','reopen'])D.on(`hr-${action}`,el=>confirmTransition(action,el.dataset.id));
   D.openDemoDocument=openDoc;
   D.on('hr-doc',el=>openDoc(el.dataset.id));
   D.on('hr-doc-new',()=>documentForm());
