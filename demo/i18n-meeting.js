@@ -49,3 +49,18 @@ window.KYD_I18N_TEMPLATES.meeting.push(
 ['計算截止月份：{month} · 每月 {days} 天 · 每日 {hours} 小時','Accrued through: {month} · {days} days per month · {hours} hours per day','គណនាដល់៖ {month} · {days} ថ្ងៃក្នុងមួយខែ · {hours} ម៉ោងក្នុងមួយថ្ងៃ'],
 ['期初 {opening}h ＋ 累計 {accrual}h ＋ 調整 {adjustment}h。核准銷假後恢復額度。','Opening {opening}h + accrued {accrual}h + adjustments {adjustment}h. Approved cancellations restore balance.','ដើមគ្រា {opening}h + បង្គរ {accrual}h + កែតម្រូវ {adjustment}h។ ការលុបច្បាប់ឈប់បានអនុម័តស្ដារសមតុល្យ។']
 );
+
+window.KYD_I18N.meeting.push(
+['班次與已核准請假重疊，請核對替班安排。','This shift overlaps approved leave. Check replacement coverage.','វេននេះជាន់គ្នានឹងច្បាប់ឈប់ដែលបានអនុម័ត។ សូមពិនិត្យអ្នកជំនួស។'],
+['依已發布班次核對；部分時段請假也列為衝突，請確認替班，不代表全天缺勤。','Checked against published shifts. Partial leave is also flagged; confirm coverage. This does not mean a full-day absence.','ផ្ទៀងផ្ទាត់តាមវេនដែលបានផ្សាយ។ ច្បាប់ឈប់មួយផ្នែកក៏ត្រូវបានសម្គាល់។ សូមពិនិត្យអ្នកជំនួស មិនមែនអវត្តមានពេញមួយថ្ងៃទេ។'],
+['查看崗位安排','View staffing assignment','មើលការរៀបចំបុគ្គលិក'],
+['人力待查','Check coverage','ពិនិត្យបុគ្គលិក'],
+['請由獲公司授權的人資或管理層處理月結。','Company-authorized HR or management must process monthly closing.','ផ្នែកធនធានមនុស្សឬថ្នាក់គ្រប់គ្រងដែលក្រុមហ៊ុនអនុញ្ញាតត្រូវដំណើរការបិទខែ។']
+);
+window.KYD_I18N_TEMPLATES.meeting.push(
+['排班無衝突 {count}','No shift conflicts: {count}','គ្មានការជាន់គ្នានៃវេន៖ {count}'],
+['請假衝突 {count}','Leave conflicts: {count}','ការជាន់គ្នានឹងច្បាប់ឈប់៖ {count}'],
+['尚無已發布班次 {count}','No published shift: {count}','មិនមានវេនដែលបានផ្សាយ៖ {count}'],
+['人員資料待核對 {count}','Employee records to check: {count}','ព័ត៌មានបុគ្គលិកត្រូវពិនិត្យ៖ {count}'],
+['需確認人力 {count}','Coverage to confirm: {count}','បុគ្គលិកត្រូវបញ្ជាក់៖ {count}']
+);
