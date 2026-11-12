@@ -48,13 +48,33 @@
   const months=Math.max(0,monthIndex(p.accruedThrough)-monthIndex(a.startMonth)+1),accrual=round(months*p.monthlyDays*p.hoursPerDay);
   const adjustment=round(store().adjustments.filter(x=>x.company===company&&x.employeeId===employeeId).reduce((n,x)=>n+x.hours,0));
   const rows=(D.state.leaveRequests||[]).filter(x=>x.id!==excludeId&&x.company===company&&x.employeeId===employeeId&&x.kind==='leave'&&x.leaveType==='annual'&&(x.startDate||x.date||'').slice(0,4)===a.startMonth.slice(0,4));
-  const used=round(rows.filter(x=>x.status==='approved').reduce((n,x)=>n+Number(x.hours||0),0));
+  const used=round(rows.filter(x=>x.status==='approved').reduce((n,x)=>n+effectiveHours(x),0));
   const reserved=round(rows.filter(pending).reduce((n,x)=>n+Number(x.hours||0),0));
   const allocation=round(a.openingHours+accrual+adjustment);
   return {configured:true,allocation,opening:a.openingHours,accrual,adjustment,months,used,pending:reserved,available:round(allocation-used-(p.reservePending?reserved:0)),policy:p};
  }
  function capacity(x){if(x.kind==='leave'&&x.leaveType==='annual'){const a=store().accounts[x.company+':'+x.employeeId];if(!a||(x.startDate||x.date||'').slice(0,4)!==a.startMonth.slice(0,4)||(x.endDate||x.date||'').slice(0,4)!==a.startMonth.slice(0,4))throw Error('跨年年假請分開申請，並先確認對應年度額度。');}if(x.kind==='leave'&&x.leaveType==='annual'&&Number(x.hours)>balance(x.employeeId,x.company,x.id).available)throw Error('年假餘額不足，請調整時數或自行選擇其他適用假別；不會自動更改假別。');}
  function original(x){return D.state.leaveRequests.find(p=>p.id===x.cancelOf&&p.company===x.company&&p.employeeId===x.employeeId&&p.kind==='leave');}
+ function interval(x){return {start:(x.startDate||x.date)+'T'+(x.startTime||'00:00'),end:(x.endDate||x.date)+'T'+(x.endTime||'23:59')};}
+ function effectiveHours(x){return x.status==='cancelled'?0:Math.max(0,round(Number(x.hours||0)-Number(x.cancelledHours||0)));}
+ function effectiveSegments(x){
+  let parts=[interval(x)];if(x.status==='cancelled')return [];
+  for(const cut of x.cancelledSegments||[])parts=parts.flatMap(p=>cut.start>=p.end||cut.end<=p.start?[p]:[{start:p.start,end:cut.start},{start:cut.end,end:p.end}].filter(a=>a.start<a.end&&a.start>=p.start&&a.end<=p.end));
+  return parts;
+ }
+ function overlapping(x,start,end){return effectiveSegments(x).some(p=>p.start<end&&p.end>start);}
+ function validateCancellation(x){
+  const old=original(x);if(!old||old.status!=='approved'||!effectiveHours(old))throw Error('請選擇本人仍有未銷時數的已核准請假。');
+  if(D.state.leaveRequests.some(p=>p.id!==x.id&&p.cancelOf===x.cancelOf&&pending(p)))throw Error('原請假已有處理中的銷假申請，請先完成或撤回。');
+  const total=effectiveHours(old),part=interval(x),hours=Number(x.hours);
+  if(!Number.isFinite(hours)||hours<=0||hours>total)throw Error('銷假時數不可超過原請假尚未銷回的時數。');
+  if(x.cancelMode==='partial'){
+   if(!effectiveSegments(old).some(p=>part.start>=p.start&&part.end<=p.end&&part.end>part.start))throw Error('銷假期間須位於原請假尚未銷回的期間內。');
+   if(hours!==(Date.parse(part.end+':00Z')-Date.parse(part.start+':00Z'))/3600000)throw Error('部分銷假請填寫相同長度的實際未休時段與時數；休息時間請分開處理。');
+   if(hours>=total)throw Error('銷回全部剩餘時數時，請選擇全部銷假。');
+  }else if(hours!==total)throw Error('原請假剩餘時數已變更，請重新開啟銷假申請。');
+  return old;
+ }
  function assertOpenPeriod(x){
   const start=(x.startDate||x.date||'').slice(0,7),end=(x.endDate||x.date||'').slice(0,7);
   if((D.state.attendanceDemo?.periods||[]).some(p=>p.company===x.company&&['review','locked'].includes(p.status)&&p.month>=start&&p.month<=end))throw Error('這個月份已送審或鎖定，請先重新開啟月結，再調整假勤。');
@@ -62,7 +82,7 @@
  function coversShift(row,shift){
   if(!shift?.start||!shift?.end)return false;
   const start=row.date+'T'+shift.start,end=(shift.overnight?D.dateAdd(row.date,1):row.date)+'T'+shift.end;
-  return (D.state.leaveRequests||[]).some(x=>x.company===row.company&&x.employeeId===row.employeeId&&x.kind==='leave'&&x.status==='approved'&&(x.startDate||x.date)+'T'+(x.startTime||'00:00')<=start&&(x.endDate||x.date)+'T'+(x.endTime||'23:59')>=end);
+  return (D.state.leaveRequests||[]).some(x=>x.company===row.company&&x.employeeId===row.employeeId&&x.kind==='leave'&&x.status==='approved'&&effectiveSegments(x).some(p=>p.start<=start&&p.end>=end));
  }
  function validateDraft(x){
   if(!Number.isFinite(Number(x.hours))||Number(x.hours)<=0)throw Error('申請時數須大於零。');
@@ -76,7 +96,7 @@
  function assertNoOverlap(x){
   if(x.kind!=='leave')return;
   const start=r=>(r.startDate||r.date)+'T'+(r.startTime||'00:00'),end=r=>(r.endDate||r.date)+'T'+(r.endTime||'23:59');
-  if(D.state.leaveRequests.some(r=>r.id!==x.id&&r.company===x.company&&r.employeeId===x.employeeId&&r.kind==='leave'&&['review','approval','approved'].includes(r.status)&&start(r)<end(x)&&end(r)>start(x)))throw Error('請假期間重疊：同一時段已有待審或已核准請假，請先修改、撤回或銷假。');
+  if(D.state.leaveRequests.some(r=>r.id!==x.id&&r.company===x.company&&r.employeeId===x.employeeId&&r.kind==='leave'&&['review','approval','approved'].includes(r.status)&&overlapping(r,start(x),end(x))))throw Error('請假期間重疊：同一時段已有待審或已核准請假，請先修改、撤回或銷假。');
  }
  function transition(id,action,note=''){
   const x=D.state.leaveRequests.find(r=>r.id===id);if(!x||!actions(x).includes(action))throw Error('目前身分或公司不能執行這一步。');
@@ -86,7 +106,7 @@
   if(action==='submit'){validateDraft(x);chosen=route(x);assertNoOverlap(x);capacity(x);}
   if(['review','approve'].includes(action)){validateDraft(x);assertNoOverlap(x);capacity(x);}
   if(x.kind==='cancel'&&['submit','review','approve'].includes(action)){
-   if(original(x)?.status!=='approved'||D.state.leaveRequests.some(p=>p.id!==id&&p.cancelOf===x.cancelOf&&['review','approval','approved'].includes(p.status)))throw Error('原請假已銷假，或已有處理中的銷假申請。');
+   validateCancellation(x);
   }
   D.mutate(()=>{
    if(action==='submit'){
@@ -96,7 +116,7 @@
    if(['review','approve'].includes(action)){
     x.stageDecisions??=[];x.stageDecisions.push({index:index(x),actorId:D.actor.id,role:D.role,at:D.today,note});
     if(action==='review'){x.reviewedBy=D.actor.id;x.routeIndex=index(x)+1;x.status=x.routeIndex===stages(x).length-1?'approval':'review';}
-    else{x.status='approved';x.approvedBy=D.actor.id;if(x.kind==='cancel'){const old=original(x);old.status='cancelled';old.cancelledBy=x.id;history(old,'已核准銷假',x.id);}}
+    else{x.status='approved';x.approvedBy=D.actor.id;if(x.kind==='cancel'){const old=original(x),cuts=x.cancelMode==='partial'?[interval(x)]:effectiveSegments(old);old.cancelledHours=round(Number(old.cancelledHours||0)+Number(x.hours));old.cancelledSegments=[...(old.cancelledSegments||[]),...cuts];old.cancelledBy=x.id;if(effectiveHours(old)===0)old.status='cancelled';history(old,'已核准'+(x.cancelMode==='partial'?'部分':'全部')+'銷假',x.id+' · '+x.hours+' 小時');}}
    }
    if(action==='return')x.status='returned';if(action==='withdraw')x.status='withdrawn';
    history(x,({submit:'送出申請',review:'複核通過，移交下一層',approve:'核准',return:'退回修改',withdraw:'撤回申請'})[action],note);
@@ -138,8 +158,8 @@
  D.on('lr-adjust',()=>{if(!editors())throw Error('目前身分不能調整。');guarded('調整員工額度',`<div class="form-grid"><label class="field">員工${D.select('employeeId',D.state.people.filter(p=>p.company===D.company&&p.active).map(p=>[p.id,p.name]))}</label><label class="field">調整時數（可正負）<input type="number" step="0.5" name="hours" required></label><label class="field full">調整原因<textarea name="reason" required></textarea></label></div>`,adjust);});
  D.on('lr-route',()=>{if(!editors())throw Error('目前身分不能設定。');const depts=[...new Set(D.state.people.filter(p=>p.company===D.company).map(p=>p.department))];guarded('設定簽核路線',`<div class="form-grid"><label class="field">申請類型${D.select('kind',Object.entries(kindNames),'leave')}</label><label class="field">部門${D.select('department',[['','全部部門'],...depts.map(d=>[d,d])],'',false)}</label><label class="field">申請人角色${D.select('applicantRole',[['','全部角色'],...Object.entries(D.roles).map(([k,a])=>[k,a.label])],'',false)}</label><label class="field">簽核層數${D.select('levels',[[1,'一層'],[2,'兩層'],[3,'三層']],2)}</label>${[1,2,3].map((n)=>`<label class="field">第 ${n} 層${D.select('stage'+n,approverRoles.map(k=>[k,D.roles[k].label]),['manager','hrmanager','ceo'][n-1])}</label>`).join('')}<label class="field">狀態${D.select('enabled',[['yes','已啟用'],['no','未啟用']],'yes')}</label></div><p class="mini">只使用所選層數；最後一層核准，其餘層複核。不能自審或重複簽核。</p>`,saveRoute);});
  D.on('lr-type',()=>{if(!editors())throw Error('目前身分不能設定。');guarded('新增公司假別','<label class="field">假別名稱<input name="name" maxlength="40" required></label>',v=>{if(!editors()||!v.name?.trim())throw Error('請填寫假別名稱。');const name=v.name.trim();if(Object.values(types).includes(name))throw Error('已有同名假別。');D.mutate(()=>{const id='custom_'+Date.now();store().customTypes.push({id,name,company:D.company});types[id]=name;D.log('新增公司假別');});});});
- D.leaveRules={types,typeOptions,assertOpenPeriod,coversShift,seed,route,stages,current,actions,visible,teamVisible,balance,transition,validateDraft,saveRoute,savePolicy,adjust,balanceHTML,policyHTML,canEdit:editors,
+ D.leaveRules={effectiveHours,effectiveSegments,overlapping,validateCancellation,types,typeOptions,assertOpenPeriod,coversShift,seed,route,stages,current,actions,visible,teamVisible,balance,transition,validateDraft,saveRoute,savePolicy,adjust,balanceHTML,policyHTML,canEdit:editors,
   routeFor:role=>{const s=defaultStages(role);return {reviewer:s[0],approver:s.at(-1)};},
   stepsHTML:x=>`<ol class="steps"><li class="step">填寫申請</li>${stages(x).map((r,i)=>`<li class="step ${pending(x)&&index(x)===i?'active':''}">${E(D.roles[r]?.label||r)} · ${i===stages(x).length-1?'核准':'複核'}</li>`).join('')}<li class="step">核准結果</li></ol>`,
-  extraFields:x=>`<label class="field full">佐證連結（選填）<input name="evidenceUrl" type="url" value="${E(x.evidenceUrl||'')}" placeholder="https://"></label>`};
+  extraFields:x=>`${D.localAttachments?.field(x.attachments)||''}<label class="field full">佐證連結（選填）<input name="evidenceUrl" type="url" value="${E(x.evidenceUrl||'')}" placeholder="https://"></label>`};
 })();

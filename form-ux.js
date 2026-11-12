@@ -70,8 +70,8 @@ function enhanceForm(f){
   syncCompanyUI(f);
   const labels={engineering:'工程名稱',engineering_work:'工作名稱',engineering_budget:'預算項目',engineering_change:'工程變更',engineering_acceptance:'驗收紀錄',business_document:'文件名稱',customer:'客戶名稱',supplier:'供應商名稱',customer_followup:'單據名稱',purchase:'採購內容',leave:'請假事由',task:'工作內容'};
   if(labels[kind])renameFormField(f,'title',labels[kind]);
-  if(f.elements.amount){renameFormField(f,'amount','金額（USD）');for(const h of f.querySelectorAll('.help'))if(h.textContent.trim()==='USD')h.hidden=true}
-  if(kind==='leave')renameFormField(f,'notes','交接安排');
+  if(f.elements.amount){renameFormField(f,'amount',f.elements.currency?'金額':'金額（USD）');for(const h of f.querySelectorAll('.help'))if(h.textContent.trim()==='USD')h.hidden=true}
+  if(kind==='leave'){const rescind=f.elements.leaveOperation?.value==='rescind';renameFormField(f,'notes',rescind?L('銷假原因','Reason for adjustment','មូលហេតុកែច្បាប់ឈប់'):'交接安排');if(rescind)f.elements.notes.required=true;}
   if(kind==='customer_followup'){
    renameFormField(f,'notes','跟進內容');f.elements.notes.required=true;
    // A follow-up note need not be entered twice as both a title and its body.
@@ -81,7 +81,7 @@ function enhanceForm(f){
   }else{
    const extra=['customer','supplier'].includes(kind)?['category','notes']:['notes'];
    if(['purchase','payable'].includes(kind))extra.unshift('engineeringId');
-   optionalFormSection(f,extra);
+   optionalFormSection(f,extra.filter(n=>!f.elements[n]?.required));
   }
   if(['customer','supplier'].includes(kind))optionalFormSection(f,['contact','phone','email'],'聯絡資料（選填）');
   if(f.dataset.parent){const parent=bRecord(f.dataset.parent);if(parent){const context=document.createElement('div');context.className='form-context';context.textContent=`${t('關聯業務')} · ${parent.data.title}`;f.prepend(context)}}

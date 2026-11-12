@@ -24,7 +24,7 @@
   const requests=D.state.leaveRequests.filter(x=>x.company===p.company&&x.employeeId===p.id&&x.kind==='leave'&&x.leaveType==='annual'&&(x.startDate||x.date)>=year&&((x.startDate||x.date)<=end)&&(['approved','cancelled'].includes(x.status)||pending(x)));
   const unresolved=requests.filter(x=>(x.startDate||x.date).slice(0,7)!==(x.endDate||x.date).slice(0,7)&&x.status!=='cancelled');
   const safe=requests.filter(x=>!unresolved.includes(x));
-  const total=rows=>rows.reduce((n,x)=>n+Number(x.hours||0),0);
+  const total=rows=>rows.reduce((n,x)=>n+(x.kind==='leave'&&x.status==='approved'?LR.effectiveHours(x):Number(x.hours||0)),0);
   const adjustments=s.adjustments.filter(x=>x.company===p.company&&x.employeeId===p.id&&x.at>=year&&x.at<=end);
   const opening=round(a.openingHours+Math.max(0,Math.min(mi(m)-1,cutoff)-mi(a.startMonth)+1)*rate+total(adjustments.filter(x=>x.at<start))-total(safe.filter(x=>x.status==='approved'&&(x.endDate||x.date)<start)));
   const accrued=mi(m)<=cutoff?round(rate):0,adjustment=round(total(adjustments.filter(x=>x.at>=start))),used=round(total(safe.filter(x=>x.status==='approved'&&(x.startDate||x.date)>=start))),reserved=round(total(safe.filter(x=>pending(x)&&(x.startDate||x.date)>=start)));
