@@ -1,7 +1,7 @@
 function documentExpiryHome(){
- const id=state.session?.user.employee_id;
+ const id=state.session?.user.employee_id;if(!id)return '';
  const rows=(state.attachments?.documents||[]).filter(d=>d.employeeId===id&&['expired','soon','awaiting'].includes(documentState(d).key));
- return rows.length?`<section class="notice"><div><strong>${L('我的證件提醒','My document reminders','ការរំលឹកឯកសាររបស់ខ្ញុំ')} · ${rows.length}</strong><p>${rows.map(d=>esc(d.type)+' · '+documentState(d).label).join(' / ')}</p></div><a class="button" href="${href('documents')}">${L('查看文件與期限','View documents and dates','មើលឯកសារ និងកាលបរិច្ឆេទ')}</a></section>`:'';
+ return [...new Set(rows.map(d=>d.company))].map(company=>{const docs=rows.filter(d=>d.company===company);return `<section class="notice"><div><strong>${L('我的證件提醒','My document reminders','ការរំលឹកឯកសាររបស់ខ្ញុំ')} · ${esc(companyName(company))} · ${docs.length}</strong><p>${docs.map(d=>esc(d.type)+' · '+documentState(d).label).join(' / ')}</p></div><a class="button" href="${href('documents',{company})}">${L('查看文件與期限','View documents and dates','មើលឯកសារ និងកាលបរិច្ឆេទ')}</a></section>`}).join('');
 }
 // Shared desktop/mobile controls for the confirmed November 12 workflow changes.
 function scheduleMonth(){const value=route().month;return /^\d{4}-(0[1-9]|1[0-2])$/.test(value||'')?value:attData().day.slice(0,7)}

@@ -102,3 +102,17 @@ th{background:#f6f8fc}
 .notice.info{background:#f0f4ff;border-color:#d8e3f2;color:#49627f}
 dialog::backdrop{background:#13263f70}
 #toast{background:#1f344e}
+
+/* A consistent current-handler and next-action summary across operational modules. */
+.flow-context,.flow-inline{overflow-wrap:anywhere;line-height:1.55;min-width:0}
+.flow-context{padding:14px 16px;margin:12px 0 18px;border:1px solid #dae3ef;border-left:3px solid #8699b3;border-radius:10px;background:#f7f9fc}
+.flow-inline{max-width:36rem;font-size:13px}
+.flow-context-label{display:block;color:#63748b;font-size:12px;margin-bottom:4px}
+.flow-context strong,.flow-inline strong,.flow-context small,.flow-inline small{display:block}
+.flow-context small,.flow-inline small{color:#63748b;margin-top:4px}
+.flow-context-next{margin:6px 0 0;color:#465a74}
+.flow-context-action{border-left-color:#245cce}.flow-context-action>strong{color:#245cce}
+.flow-context-blocked{border-left-color:#a9792b}.flow-context-blocked>strong{color:#94631b}
+.flow-context-done{border-left-color:#18795c}
+.workflow-list td{vertical-align:top}.workflow-list td>small{display:block;margin-top:5px;color:#63748b}.workflow-list td:last-child{min-width:132px}
+@media(max-width:600px){.flow-context{padding:12px}.flow-inline{max-width:100%}.wf-mobile-list .flow-inline{margin:14px 0}.wf-mobile-list .flow-context-next{margin-bottom:10px}}
