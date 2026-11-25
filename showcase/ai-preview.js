@@ -1,7 +1,7 @@
 /* Offline, synthetic exhibition preview. No model or remote service is called. */
 (()=>{'use strict';
  const D=window.D,E=D.esc.bind(D),roles=['chairman','ceo','admin'];
- const marker='功能預覽.示範資料';
+ const marker='預覽 · 演示資料';
  const n=v=>Number.isFinite(Number(v))?Number(v):0;
  const fmt=v=>new Intl.NumberFormat('en-US',{maximumFractionDigits:1}).format(n(v));
  const usd=v=>D.money(n(v));

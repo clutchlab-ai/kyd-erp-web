@@ -1,5 +1,5 @@
 {
-  "version": "2026-11-25.1",
+  "version": "2026-11-25.2",
   "eventDate": "2026-11-27",
   "defaultLanguage": "zh-Hans",
   "languages": [
@@ -71,49 +71,40 @@
       "runtimeErrors": 0,
       "externalRequests": 0
     },
-    "delivery-entry": {
+    "brand-results.json": {
       "checks": [
-        "Recipient ZIP integrity and five numbered entry files",
-        "All offline entry/navigation links resolve",
-        "Actual offline app launch from recipient entry",
-        "Desktop and 390px mobile layout",
-        "Screenshot zoom and keyboard close"
-      ],
-      "runtimeErrors": 0,
-      "externalRequests": 0
-    },
-    "delivery-copy": {
-      "checks": [
-        "Recipient-facing wording and factual action/result tables",
-        "Offline entry and guide filenames resolve",
-        "Application binaries unchanged",
-        "ZIP integrity verified"
+        "正式Logo原图嵌入、品牌文字及深蓝主色",
+        "董事长首页只有一个小型预览标签",
+        "重新演示按钮、弹窗标题与确认按钮一致",
+        "全部管理视图无指定旧用语"
       ],
       "runtimeErrors": 0,
       "externalRequests": 0
     }
   },
   "files": {
-    "README.md": "e3ea8c97ef19ab461f1999f58bc325833d0418b720dd91a3f1e292ac5007a8c2",
+    "README.md": "4a462cb13602de585d3b9b613b682b1938e991a7e5029a781c447969cf63be31",
     "THIRD-PARTY.txt": "b39a13106b13d57f248cec44cdaaf329c7dfcfadb9cd1524efabe9484cae7fb6",
-    "Wharton_ERP_手机离线展示版.html": "fd8ae94d8b9ce39c9ea07f106bfb31f65c85260fd8b3507615a6b00c5201839e",
-    "Wharton_ERP_离线展示版.html": "ef4d7dd04465ebeefda636526a542360af8a32146bbefb855ae43c9b90f9c4a9",
+    "Wharton_ERP_手机离线展示版.html": "ed24d44bd8b367c7bda1326eeacddd89d4ee9ac57e4f2a9c0ef7fac55781842b",
+    "Wharton_ERP_离线展示版.html": "c099948846ab5c36e514f88227f0fe529824a71edac50e3aec379212c2daec91",
     "accounting-content.js": "88b4f5f3816dbb6d62cc9b8d3f13ee7f5a78a7c66a7017d60cadd4db2fe76530",
     "accounting-template.css": "98109ca78605745567afc18443adc2ae9343df91785264ee35dc8d6e1391c053",
     "accounting-template.js": "2d44f36810b342f3db5be27700c8b12a7c0535033d3491a46569682d0bf1bcd4",
     "admin-settings-content.js": "ad0203c467fa234a6a36794db36ce1369f1b6451f6dc2fa9a771c5e1d8424810",
-    "ai-preview.css": "bb56e55a0db96062a970d168391fcaf40e4c2b5ada512954d3a6767e801269ef",
-    "ai-preview.js": "22f980bafad3ad25fa4caf341c119c55854ffb871f670ba29500e5345e063d1e",
+    "ai-preview.css": "acdef97b0f91782e9f27d05f911789e835065b822f247838a9c0eaf998601e18",
+    "ai-preview.js": "20daa895964532155c75ec480cd1ad76b86bedd15bc8329ef8b0e5adb496d623",
     "attendance.js": "1702376deb71598127b4553d9ecaee94b7d13c6ed29e4caf62904bd7eb0793d6",
     "boot.js": "d870019e95806867db4aea29bad1ebe171185950506977f29595b1bdad52ed97",
+    "brand-logo.jpg": "4ff821225856dc5fc53e545cd6715e349fc58ac3f01b03c9f875cca2f2089d93",
     "business.js": "3f54663069b444a3e5daf7ad82c82360e5589019d6b64fdb48c4347f0cb47995",
-    "core.js": "ba8b4e80ee38df9f00b81cbd0f428966839774d670d8a9f0779bdc2ecf5ed533",
+    "core.js": "9ccb03fbfb8a7e61e7aeb6ce9886ebeb0f74ebbdb82987073964b70c018de2f4",
+    "delivery.html": "b3415a8d5b04d75824749b386fb872d696482c4ffb87361b5b0ab8a71fe16714",
     "demo.css": "447253f14af1e32070f47f71d6dba9b31ca5e6139493b5bdd69641e133f736db",
     "engineering-content.js": "bd9fcf5c88a6f66ef1bed26cfc0e3181cf6bb4bae41d6f8de693ae482fba5ee0",
-    "exhibition-shell.css": "c3fdcd254d2316bd46284dcce51ed017c115dae6b8fd5ec72fa18756731680fb",
-    "exhibition-shell.js": "076ea344f18b9e7d708aaddcf1e0b6a493b65240cb878dbc57369c4917b0b03e",
-    "factory-preview.css": "e9032e2a369656f8e8d25b507c0b312863ce3325401fb601b493c2ab6acc9ed2",
-    "factory-preview.js": "2b6cdfb39f8b40ce0f3fb5296f0336764e51b264bd35e2a76ff1dab7a8847596",
+    "exhibition-shell.css": "bf41e66ecb06012a13f6f12c72c106b30942778ff8a9f1b0bfd529969496742c",
+    "exhibition-shell.js": "a44027c0627ba6f4a1bc4891f37c99e7568bf2d09cb5ec6c6cac8f35670a98cc",
+    "factory-preview.css": "430cfae0320232bb7f093ceef04adefac65da26c3ac17a03251dc7a94c08db23",
+    "factory-preview.js": "a3b7506f78be1a8e21ab957da0bd4d20dddd2fcd3fa14e612523270a158d2a17",
     "hr-workbench.css": "9564200bbd04cb8deaccd63e5af01cbaf81519d8172839a4b490d8741747ca6f",
     "hr-workbench.js": "7e8abf51651a3d97e39b9a9bfdb0432e0b7cc8824a378f97563595008e03695b",
     "hr.js": "085b29eaf35f62cf86e3b39b3728e51b41e97fa6510992a54c7cdbc00f78909a",
@@ -126,8 +117,8 @@
     "i18n-hr.js": "ad9b6316f7571f9510787ae0d8f2dc14577450c0f1aa6b462551336ab520e5ec",
     "i18n-meeting.js": "3e3c2273f785115811db7977c991d8aa8dfb6bb74cb96f4631246731d94a7b21",
     "i18n.css": "be6189e3810abbd860d9db9ef12d80109f39113326537cd4a54f42a45a8bcfe5",
-    "i18n.js": "ebf9d5401d350d8dd31c970f876d52c9513ccce3e66620efae39c348a94a6a26",
-    "index.html": "7dc1f47eab6edd675c5568089ee473601e39749b41cb43e51e65f23a31862a41",
+    "i18n.js": "62fb4feb14a956fa9ce6aea4798e9fd81d1f4986ba065893299fedeb086b7ee2",
+    "index.html": "d5ee94f50cbd3fe54c5b95344c88578c51eaaee21d3151d8a0745a539494d781",
     "launch.command": "61850990f21a1cc99040f351ac385d32ff3f0b0e8f1a1f02d08f8764ed0c58a9",
     "leave-applications-content.js": "c622ede4cc9745a36c17e486b8e91cfe44975dee1b05a58aee4ba53e3e78879d",
     "leave-rules.js": "e8c6ab30f9c28fd19ecee9956c1b8bda1bd8a0bee4c6a8f82f3717b82ff950d0",
@@ -136,10 +127,10 @@
     "management-overview.js": "b64c33d3e7e048f56b5c48b3a2783f027e9a5b34794483736a3c90f48252fee1",
     "meeting-requests.js": "cec491d276b043038f197e048adeca586913cf3c0b47d89d348a39337a78ba30",
     "mobile-shell.css": "c5a33a47b4f81cbb19bea8d6374d2a0c76cde5408407aa31702bfc1ec19afefc",
-    "mobile-shell.js": "8f55dbfaea0ef60da433608df2865974fcb8865f0a4223effa09126a84ab3e54",
+    "mobile-shell.js": "3e85bea6969516ec408b0e6866ee84a7b4831d8acbf1f144e161d3beefebba42",
     "mobile-tables.css": "b88250c5a74737e1a8921dca0b7b4fe8c067aeac63a741c06ab9e03366c97c6c",
     "mobile-tables.js": "d3e5d14169cc974eb9ca8b81767643dd87adeb449e8d41eaeb6784b3e2a16839",
-    "mobile.html": "1530ac56c4cb0decd518ac79ec83843121c81f7a78fab6612b932a2d2e22c241",
+    "mobile.html": "c61d6d5e9213521e3bad863c3bd0d0d1e15098f8be54d9d4dfe742a54a7321e3",
     "notifications.js": "c1f2e58befd11b57c723b36cd4fac273f75fd100af0399d536f61f66fc265c32",
     "payroll-content.js": "8d24101cf65db8c74886cf675418fdba69f1fac9396805aa6428964fcc1762bf",
     "performance.js": "7981d81811af0273d92e684152df3ee4a2480fe0ab8e9ff27d3d86b682106f1b",
@@ -147,18 +138,19 @@
     "projects.js": "009560ecab81ffdf69ea68e803287679bd9b21a9364b334b9105783def7f0241",
     "retained-content.js": "55dc5d19deed6c48ba716b67356421b4759ef69d2929928ef9b0c527c98aa2ee",
     "showcase-data.js": "74495f08fdcb0361a33473dab4f6a4bd7fa4c3346666cee64c4332322fbd21d4",
-    "showcase-theme.css": "57e11b3cfb1d783d6b44ff64fbf9cd681b35fd4854abc92b6cf4a2ebcb47c73d",
+    "showcase-theme.css": "93ea7b8e9caae9a6cd0e81e1b273f930daa9e46ac0cb90d09ff3e112411d7220",
     "start.sh": "2b03aa78fe72c795646172714afb13d27a607c3b252f95903143da886fc1485e",
     "training-content.js": "e7fa3db68949dff9643116e09238a83203dece950468134e2ca0aa1cf1e4b734",
     "vendor/OpenCC-LICENSE.txt": "960f7fc16d8baa126802316a7df9078a383af4fb6bc60033adb28e85c08d5e5e",
     "vendor/OpenCC-THIRD-PARTY.md": "42c7dbe71c178fcca97ba945e9ac9ff360fb69bbfea4cb50556f6c65bfa59806",
     "vendor/OpenCC-data-Apache-2.0.txt": "b534e465949558eec2597b04f5092b5e161236a68dfbfd04d547592ac3964308",
     "vendor/opencc-1.4.2.js": "95b04abf136d9c28263773bb7d357eac80b7954d101efd23c4d09c737d3d379e",
-    "功能现况.html": "18b3537acd4dc12e8d099b85238a37c3ef93196f47db4c793c3b79a600ff879a",
-    "排练操作.html": "da25c203acb4a91796a2de5c3838dddb9b4f42034fec9d723cfe5cbae7678451",
-    "排练操作.md": "73afcfe897d99de3b1ca5eb98f0e10b6c06468a9261df557b9c1662cd1ed997b",
-    "delivery.html": "0da6bd0dec552a13cf083bcc4f73f9271baba82960d4d7ff1e60a37348ecb4dc",
-    "Wharton_ERP_交付包_20261125.zip": "76b9245f47138e8185056b25374699a1d8b4ea4eac44bb97230a80d6433d77ba"
+    "功能现况.html": "c5c1096d730263b172fe83b9cd9b5ba9a1b9d5c149d340921e8b8c9af50f0634",
+    "排练操作.html": "4d0ee46f80ff3d536421ed9964c90de4ea6de2858037b26e6aef432880889ea2",
+    "排练操作.md": "64e2b28c0001c292872ffc09e7b30d7cea19584d9b73feb2a7affd488ab3edf1",
+    "Wharton_ERP_交付包_20261125.zip": "afef7cb22f20d7c00103ec1f8a90b908cc1d17050c2080ce27289284ccb536aa",
+    "Wharton_ERP_展示版_20261125.zip": "d11fd6777ffd09fdf268cb914a5ca9cfb96b89fd77bee674ee3a6243585fd5b3"
   },
-  "deliveryRevision": "2026-11-25.3"
+  "deliveryRevision": "2026-11-25.4",
+  "brand": "华顿智汇 Wharton Insight AI"
 }

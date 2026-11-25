@@ -6,7 +6,16 @@
  const normalize=value=>value==='zh'?'zh-Hant':LANGS.includes(value)?value:'zh-Hans';
  let language='zh-Hans';try{language=normalize(localStorage.getItem(KEY));}catch{}
  const toSimplified=window.OpenCC.Converter({from:'tw',to:'cn'});
- const mainland=source=>toSimplified(String(source)).replace(/请款/g,'付款申请').replace(/签核/g,'核准').replace(/帐/g,'账').replace(/纪录/g,'记录').replace(/模组/g,'模块').replace(/储存/g,'保存').replace(/新增/g,'添加').replace(/建立/g,'创建').replace(/专案/g,'项目').replace(/资讯/g,'信息').replace(/营运/g,'运营').replace(/串接/g,'对接').replace(/档案/g,'文件');
+ // Display terminology only: persisted records and submitted option values stay unchanged.
+ const mainland=source=>toSimplified(String(source))
+  .replace(/示范资料/g,'演示数据').replace(/资料/g,'数据')
+  .replace(/请款/g,'付款申请').replace(/签核|核准/g,'审批').replace(/假勤申请/g,'请假申请')
+  .replace(/设定/g,'设置').replace(/合约/g,'合同').replace(/传票/g,'凭证').replace(/零用金/g,'备用金')
+  .replace(/汇入/g,'导入').replace(/开启/g,'打开').replace(/讯号/g,'信号').replace(/即时/g,'实时')
+  .replace(/预设/g,'预置').replace(/重工/g,'返工').replace(/人资/g,'人事')
+  .replace(/帐/g,'账').replace(/纪录/g,'记录').replace(/模组/g,'模块').replace(/储存/g,'保存')
+  .replace(/新增/g,'添加').replace(/建立/g,'创建').replace(/专案/g,'项目').replace(/资讯/g,'信息')
+  .replace(/营运/g,'运营').replace(/串接/g,'对接').replace(/档案/g,'文件');
  const textSources=new WeakMap(),attributeSources=new WeakMap(),explicitProtected=new Set();
  const exact=new Map(),templates=[],nameValues=new Set(),freeValues=new Set();
  let applying=false,scheduled=false,disposed=false,titleSource='',titleLast='';
@@ -33,6 +42,7 @@
    templates.push({zh,en,km,keys,ui,regex:new RegExp('^'+parts.join('')+'$'),literalLength:zh.length-keys.length*4});
   }
   templates.sort((a,b)=>b.literalLength-a.literalLength);
+  exact.set('重新演示',{en:'Restart demo',km:'កំណត់គំរូឡើងវិញ'});
  }
  const dataKeys=/^(?:name|employeeName|requester|vendor|contact|title|note|notes|reason|target|description|evidence|answer|comment|comments|remark|remarks|handover|change|summary|url|filename|fileName|email|address|phone|passport|number|documentNumber)$/;
  const identityKeys=/^(?:name|employeeName|requester|vendor|companyName|legalName|display_name|displayName|fullName|full_name)$/;
