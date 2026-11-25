@@ -1,5 +1,5 @@
 /* Keep exhibition additions consistent with the accepted PMS companion skin. */
-html[data-locale="zh-Hans"]{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+html[data-locale="zh-Hans"]{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Wharton Han","Wharton Khmer",sans-serif}
 .preview-locale-note{padding:10px 14px;border:1px solid #d5e1ed;border-radius:8px;color:#526c85;background:#f4f7fb;font-size:13px;line-height:1.5}
 .demo-banner{flex-wrap:wrap}.demo-banner>span{flex:1}.demo-banner .banner-button{white-space:nowrap}
 @media(max-width:760px){.demo-banner{gap:6px}.demo-banner>span{flex-basis:100%;order:3;font-size:11px}.demo-banner>strong{margin-right:auto}.demo-banner .banner-button{font-size:12px;padding:4px 8px}.context-controls select{max-width:100%}}

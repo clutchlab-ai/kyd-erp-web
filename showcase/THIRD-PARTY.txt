@@ -5,3 +5,11 @@ Licenses: vendor/OpenCC-LICENSE.txt, vendor/OpenCC-data-Apache-2.0.txt
 Attribution: vendor/OpenCC-THIRD-PARTY.md
 Included locally (not loaded from a CDN); conversion from Traditional to Simplified Chinese uses OpenCC and a small ERP terminology layer.
 The independent language switch retains the accepted English and Khmer catalogs. New Factory and AI pages currently support Chinese; other languages display a pending-translation note. No external translation API is used.
+
+Offline CJK / Khmer fonts (SIL Open Font License 1.1)
+Noto Sans CJK TC: Copyright 2014-2021 Adobe (http://www.adobe.com/).
+https://github.com/notofonts/noto-cjk
+Noto Sans Khmer: Copyright 2022 The Noto Project Authors (https://github.com/notofonts/khmer).
+CJK subsets renamed Wharton Han. Khmer width fixed at 100; shaping repertoire retained.
+Licenses, pinned sources and output hashes: fonts/CJK-OFL.txt, fonts/Khmer-OFL.txt, fonts/README.md, fonts/manifest.json.
+Fonts are included locally and embedded in standalone HTML. No external font service is contacted.
