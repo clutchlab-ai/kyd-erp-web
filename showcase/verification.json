@@ -70,6 +70,17 @@
       ],
       "runtimeErrors": 0,
       "externalRequests": 0
+    },
+    "delivery-entry": {
+      "checks": [
+        "Recipient ZIP integrity and five numbered entry files",
+        "All offline entry/navigation links resolve",
+        "Actual offline app launch from recipient entry",
+        "Desktop and 390px mobile layout",
+        "Screenshot zoom and keyboard close"
+      ],
+      "runtimeErrors": 0,
+      "externalRequests": 0
     }
   },
   "files": {
@@ -133,8 +144,11 @@
     "vendor/OpenCC-THIRD-PARTY.md": "42c7dbe71c178fcca97ba945e9ac9ff360fb69bbfea4cb50556f6c65bfa59806",
     "vendor/OpenCC-data-Apache-2.0.txt": "b534e465949558eec2597b04f5092b5e161236a68dfbfd04d547592ac3964308",
     "vendor/opencc-1.4.2.js": "95b04abf136d9c28263773bb7d357eac80b7954d101efd23c4d09c737d3d379e",
-    "功能现况.html": "ad123800ae641af2e8d2e8ead26a6289a2a80b1266a16d3569d2946e538c2a97",
-    "排练操作.html": "68a5984ff7b9aac22f15595d660eb6c8edc5a119287518a569c821f35003b963",
-    "排练操作.md": "9100814cb36e499945b76c559b683ce159cd951012d2c6df49f2f50ecc6a7052"
-  }
+    "功能现况.html": "6f6cff4ca18283d167c38993af52b47b5b0dc2e6be958e997b469678a7c178db",
+    "排练操作.html": "4cada9586938c91d00d6fa84bb47ebfaccc660284b354246186c8fa2be1e0ea5",
+    "排练操作.md": "9100814cb36e499945b76c559b683ce159cd951012d2c6df49f2f50ecc6a7052",
+    "delivery.html": "423c9a6cd0013f304c59acebda7c55fe08ee75df44578592146fc4343e2bd4a6",
+    "Wharton_ERP_交付包_20261125.zip": "ddd3bc4daa4125e81f3a1eaa73ca1c3ae43bd8f4e29762c8cfd9a9eadefa896a"
+  },
+  "deliveryRevision": "2026-11-25.2"
 }
