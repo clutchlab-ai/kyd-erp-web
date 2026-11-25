@@ -36,7 +36,7 @@
  }
  function modules(){
   const visible=Object.values(D.modules).filter(m=>m.nav!==false&&D.allowed(m.id)&&!['home','notifications'].includes(m.id));
-  D.modal('工作模組',`<div class="phone-module-groups">${groups.map(g=>{const items=visible.filter(m=>m.group===g);return items.length?`<section><h3>${g}</h3>${items.map(m=>`<button class="phone-module-row" data-action="mobile-nav" data-view="${m.id}"><span>${E(m.title)}</span>${icon('next')}</button>`).join('')}</section>`:''}).join('')}</div>`);
+  D.modal('工作模組',`<div class="phone-module-groups">${groups.map(g=>{const items=visible.filter(m=>m.group===g);return items.length?`<section><h3>${g}</h3>${items.map(m=>`<button class="phone-module-row" data-action="mobile-nav" data-view="${m.id}"><span>${E(m.navTitle||m.title)}</span>${icon('next')}</button>`).join('')}</section>`:''}).join('')}</div>`);
  }
  function header(){
   const r=D.route(),title=D.modules[r.view]?.title||'工作首頁',count=unread();
