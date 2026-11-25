@@ -1,0 +1,25 @@
+/* Shared language control, including forms that are being edited. */
+.i18n-control{display:inline-flex;align-items:center;gap:4px;flex:0 0 auto;min-width:0;margin:0;color:#52637a}
+.i18n-globe{font-size:19px;line-height:1;font-weight:600}
+.i18n-control select{width:auto;min-width:94px;max-width:125px;min-height:36px;border:1px solid #dce4ef;border-radius:9px;background:#fff;color:#24364e;font-size:12px;padding:7px 23px 7px 9px;cursor:pointer}
+.modal-heading .i18n-control{margin-left:auto}.modal-heading h2{min-width:0}.modal-heading>.i18n-control+.icon-button{margin-left:4px}
+html[lang="km"] body{font-family:"Noto Sans Khmer","Khmer Sangam MN","Khmer OS",system-ui,sans-serif;line-height:1.7}
+html[lang="km"] button,html[lang="km"] input,html[lang="km"] select,html[lang="km"] textarea{font-family:inherit;line-height:1.6}
+html[lang="km"] .phone-title strong{font-size:15px}html[lang="km"] .nav-item{line-height:1.65}html[lang="km"] .badge{line-height:1.6}
+body.mobile-mode .phone-topline{gap:8px;flex-wrap:wrap}
+body.mobile-mode .phone-topline .phone-title{flex:1;min-width:85px}
+body.mobile-mode .phone-topline .i18n-control{order:3;margin-left:auto}
+body.mobile-mode .phone-topline .i18n-globe{display:none}
+body.mobile-mode .i18n-control select{min-width:80px;max-width:108px;min-height:38px;font-size:12px;padding:7px 20px 7px 7px}
+body.mobile-mode .modal-heading{flex-wrap:wrap;gap:7px}
+body.mobile-mode .modal-heading h2{flex:1 1 150px}
+body.mobile-mode .modal-heading .i18n-control{margin-left:auto}
+body.mobile-mode .phone-shortcuts strong{white-space:normal;line-height:1.5;text-align:center;overflow-wrap:anywhere}
+body.mobile-mode .phone-shortcuts>button{min-width:0}
+body.mobile-mode #phone-navigation>button{font-size:10px;line-height:1.4}
+html[lang="km"] body.mobile-mode #phone-navigation>button{font-size:10px;line-height:1.65}
+html[lang="en"] body.mobile-mode .demo-banner:after{content:'Mobile demo'}
+html[lang="km"] body.mobile-mode .demo-banner:after{content:'សាកល្បងលើទូរសព្ទ'}
+html[lang="en"] .context-controls>label,html[lang="km"] .context-controls>label{max-width:240px}
+@media(max-width:1050px){.context-controls{gap:8px;flex-wrap:wrap}.context-controls .i18n-control{margin-left:auto}}
+@media(max-width:380px){body.mobile-mode .phone-topline .phone-title{min-width:65px}body.mobile-mode .phone-topline .phone-title strong{font-size:15px}body.mobile-mode .phone-topline .i18n-control select{max-width:91px;min-width:76px}.phone-topline .phone-icon{flex-basis:38px;width:38px}}

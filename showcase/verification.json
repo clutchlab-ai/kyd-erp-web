@@ -1,0 +1,140 @@
+{
+  "version": "2026-11-25.1",
+  "eventDate": "2026-11-27",
+  "defaultLanguage": "zh-Hans",
+  "languages": [
+    "zh-Hans",
+    "zh-Hant",
+    "en",
+    "km"
+  ],
+  "newPreviewLanguages": [
+    "zh-Hans",
+    "zh-Hant"
+  ],
+  "newPreviewStatus": "只有画面（离线前端联动）",
+  "syntheticDataOnly": true,
+  "backend": false,
+  "externalAI": false,
+  "checks": {
+    "browser-results.json": {
+      "checks": [
+        "默认简体、四种语言、固定日期与虚构公司",
+        "四分钟路线：员工填写并送出请假",
+        "人资主管复核、CEO核准同一张请假单",
+        "员工结果与班表可追溯到已核准请假",
+        "两分钟路线：董事长从待办核准费用申请",
+        "旧版语言切换可用且选择保留",
+        "关键模块简体文字检查",
+        "各角色各模块能打开，无运行错误",
+        "未呼叫外部服务"
+      ],
+      "runtimeErrors": 0,
+      "externalRequests": 0
+    },
+    "mobile-results.json": {
+      "checks": [
+        "手机默认简体，可切班组长",
+        "不良数超过产量时阻挡，订单库存不变",
+        "手机提交200件/10不良，良品及库存同步",
+        "订单、出库记录和董事长风险能点回来源",
+        "AI三组问答和图表可操作，提醒转待办且防重",
+        "手机返回、重设与断网加载"
+      ],
+      "runtimeErrors": 0,
+      "externalRequests": 0
+    },
+    "offline/offline-results.json": {
+      "checks": [
+        "手机默认简体，可切班组长",
+        "不良数超过产量时阻挡，订单库存不变",
+        "手机提交200件/10不良，良品及库存同步",
+        "订单、出库记录和董事长风险能点回来源",
+        "AI三组问答和图表可操作，提醒转待办且防重",
+        "手机返回、重设与断网加载"
+      ],
+      "runtimeErrors": 0,
+      "externalRequests": 0
+    },
+    "offline-desktop/browser-results.json": {
+      "checks": [
+        "默认简体、四种语言、固定日期与虚构公司",
+        "四分钟路线：员工填写并送出请假",
+        "人资主管复核、CEO核准同一张请假单",
+        "员工结果与班表可追溯到已核准请假",
+        "两分钟路线：董事长从待办核准费用申请",
+        "旧版语言切换可用且选择保留",
+        "关键模块简体文字检查",
+        "各角色各模块能打开，无运行错误",
+        "未呼叫外部服务"
+      ],
+      "runtimeErrors": 0,
+      "externalRequests": 0
+    }
+  },
+  "files": {
+    "README.md": "392a274eab147c17cea329c18c9335af36f0257537268d0c59692c88df015d72",
+    "THIRD-PARTY.txt": "b39a13106b13d57f248cec44cdaaf329c7dfcfadb9cd1524efabe9484cae7fb6",
+    "Wharton_ERP_手机离线展示版.html": "fd8ae94d8b9ce39c9ea07f106bfb31f65c85260fd8b3507615a6b00c5201839e",
+    "Wharton_ERP_离线展示版.html": "ef4d7dd04465ebeefda636526a542360af8a32146bbefb855ae43c9b90f9c4a9",
+    "accounting-content.js": "88b4f5f3816dbb6d62cc9b8d3f13ee7f5a78a7c66a7017d60cadd4db2fe76530",
+    "accounting-template.css": "98109ca78605745567afc18443adc2ae9343df91785264ee35dc8d6e1391c053",
+    "accounting-template.js": "2d44f36810b342f3db5be27700c8b12a7c0535033d3491a46569682d0bf1bcd4",
+    "admin-settings-content.js": "ad0203c467fa234a6a36794db36ce1369f1b6451f6dc2fa9a771c5e1d8424810",
+    "ai-preview.css": "bb56e55a0db96062a970d168391fcaf40e4c2b5ada512954d3a6767e801269ef",
+    "ai-preview.js": "22f980bafad3ad25fa4caf341c119c55854ffb871f670ba29500e5345e063d1e",
+    "attendance.js": "1702376deb71598127b4553d9ecaee94b7d13c6ed29e4caf62904bd7eb0793d6",
+    "boot.js": "d870019e95806867db4aea29bad1ebe171185950506977f29595b1bdad52ed97",
+    "business.js": "3f54663069b444a3e5daf7ad82c82360e5589019d6b64fdb48c4347f0cb47995",
+    "core.js": "ba8b4e80ee38df9f00b81cbd0f428966839774d670d8a9f0779bdc2ecf5ed533",
+    "demo.css": "447253f14af1e32070f47f71d6dba9b31ca5e6139493b5bdd69641e133f736db",
+    "engineering-content.js": "bd9fcf5c88a6f66ef1bed26cfc0e3181cf6bb4bae41d6f8de693ae482fba5ee0",
+    "exhibition-shell.css": "c3fdcd254d2316bd46284dcce51ed017c115dae6b8fd5ec72fa18756731680fb",
+    "exhibition-shell.js": "076ea344f18b9e7d708aaddcf1e0b6a493b65240cb878dbc57369c4917b0b03e",
+    "factory-preview.css": "e9032e2a369656f8e8d25b507c0b312863ce3325401fb601b493c2ab6acc9ed2",
+    "factory-preview.js": "2b6cdfb39f8b40ce0f3fb5296f0336764e51b264bd35e2a76ff1dab7a8847596",
+    "hr-workbench.css": "9564200bbd04cb8deaccd63e5af01cbaf81519d8172839a4b490d8741747ca6f",
+    "hr-workbench.js": "7e8abf51651a3d97e39b9a9bfdb0432e0b7cc8824a378f97563595008e03695b",
+    "hr.js": "085b29eaf35f62cf86e3b39b3728e51b41e97fa6510992a54c7cdbc00f78909a",
+    "i18n-accounting-template.js": "8ed58d3c19ca97773e1eb552cc830a4bb86105d59ca6e1c2a4d7df12737dae86",
+    "i18n-base.js": "03a2b52516faf335dcd74ca93115f0c9e37498561a5ad7cfff9ee601ba2a1b10",
+    "i18n-business.js": "71e094d6c715d98a1cf02852c4d8bc7875c5227fba466cd3f5efc7aba48ef91a",
+    "i18n-common-extra.js": "9c52ad88728d42ebb22bb54b392d13d428304ee1047eeb29a8bbb169d22aff46",
+    "i18n-common.js": "17944b14804c1432ffbbc413630a8179d835d618ae11ac384919cab759ff18df",
+    "i18n-hr-workbench.js": "659d4b8b2969e94da5d3fa223a5294def9934fad15ef79803ac83c41406b2faa",
+    "i18n-hr.js": "ad9b6316f7571f9510787ae0d8f2dc14577450c0f1aa6b462551336ab520e5ec",
+    "i18n-meeting.js": "3e3c2273f785115811db7977c991d8aa8dfb6bb74cb96f4631246731d94a7b21",
+    "i18n.css": "be6189e3810abbd860d9db9ef12d80109f39113326537cd4a54f42a45a8bcfe5",
+    "i18n.js": "ebf9d5401d350d8dd31c970f876d52c9513ccce3e66620efae39c348a94a6a26",
+    "index.html": "7dc1f47eab6edd675c5568089ee473601e39749b41cb43e51e65f23a31862a41",
+    "launch.command": "61850990f21a1cc99040f351ac385d32ff3f0b0e8f1a1f02d08f8764ed0c58a9",
+    "leave-applications-content.js": "c622ede4cc9745a36c17e486b8e91cfe44975dee1b05a58aee4ba53e3e78879d",
+    "leave-rules.js": "e8c6ab30f9c28fd19ecee9956c1b8bda1bd8a0bee4c6a8f82f3717b82ff950d0",
+    "local-attachments.js": "9ab197fff11d23f18f05189b6830bd38a900dd897340c755256d55021df6f776",
+    "management-overview.css": "3962f0e4a3dec8246f0afe67d74b190c666928d0f25c3a12ffffecd5238437e4",
+    "management-overview.js": "b64c33d3e7e048f56b5c48b3a2783f027e9a5b34794483736a3c90f48252fee1",
+    "meeting-requests.js": "cec491d276b043038f197e048adeca586913cf3c0b47d89d348a39337a78ba30",
+    "mobile-shell.css": "c5a33a47b4f81cbb19bea8d6374d2a0c76cde5408407aa31702bfc1ec19afefc",
+    "mobile-shell.js": "8f55dbfaea0ef60da433608df2865974fcb8865f0a4223effa09126a84ab3e54",
+    "mobile-tables.css": "b88250c5a74737e1a8921dca0b7b4fe8c067aeac63a741c06ab9e03366c97c6c",
+    "mobile-tables.js": "d3e5d14169cc974eb9ca8b81767643dd87adeb449e8d41eaeb6784b3e2a16839",
+    "mobile.html": "1530ac56c4cb0decd518ac79ec83843121c81f7a78fab6612b932a2d2e22c241",
+    "notifications.js": "c1f2e58befd11b57c723b36cd4fac273f75fd100af0399d536f61f66fc265c32",
+    "payroll-content.js": "8d24101cf65db8c74886cf675418fdba69f1fac9396805aa6428964fcc1762bf",
+    "performance.js": "7981d81811af0273d92e684152df3ee4a2480fe0ab8e9ff27d3d86b682106f1b",
+    "personnel-content.js": "65b0d4e39f90541bfafe45bce6bdea7e5a4b36d217519199df1e82163d4eb045",
+    "projects.js": "009560ecab81ffdf69ea68e803287679bd9b21a9364b334b9105783def7f0241",
+    "retained-content.js": "55dc5d19deed6c48ba716b67356421b4759ef69d2929928ef9b0c527c98aa2ee",
+    "showcase-data.js": "74495f08fdcb0361a33473dab4f6a4bd7fa4c3346666cee64c4332322fbd21d4",
+    "showcase-theme.css": "57e11b3cfb1d783d6b44ff64fbf9cd681b35fd4854abc92b6cf4a2ebcb47c73d",
+    "start.sh": "2b03aa78fe72c795646172714afb13d27a607c3b252f95903143da886fc1485e",
+    "training-content.js": "e7fa3db68949dff9643116e09238a83203dece950468134e2ca0aa1cf1e4b734",
+    "vendor/OpenCC-LICENSE.txt": "960f7fc16d8baa126802316a7df9078a383af4fb6bc60033adb28e85c08d5e5e",
+    "vendor/OpenCC-THIRD-PARTY.md": "42c7dbe71c178fcca97ba945e9ac9ff360fb69bbfea4cb50556f6c65bfa59806",
+    "vendor/OpenCC-data-Apache-2.0.txt": "b534e465949558eec2597b04f5092b5e161236a68dfbfd04d547592ac3964308",
+    "vendor/opencc-1.4.2.js": "95b04abf136d9c28263773bb7d357eac80b7954d101efd23c4d09c737d3d379e",
+    "功能现况.html": "ad123800ae641af2e8d2e8ead26a6289a2a80b1266a16d3569d2946e538c2a97",
+    "排练操作.html": "68a5984ff7b9aac22f15595d660eb6c8edc5a119287518a569c821f35003b963",
+    "排练操作.md": "9100814cb36e499945b76c559b683ce159cd951012d2c6df49f2f50ecc6a7052"
+  }
+}

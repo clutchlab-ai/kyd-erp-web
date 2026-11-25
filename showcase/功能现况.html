@@ -1,0 +1,294 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Wharton ERP｜功能现况</title><style>*{box-sizing:border-box}body{margin:0;background:#f4f5f2;color:#203537;font:16px/1.8 -apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif}header{background:#1c2e31;color:#fff;padding:20px 28px;border-bottom:3px solid #a58d4d}header b{font-size:19px}main{max-width:1100px;margin:auto;padding:30px 24px 65px}h1{font-size:30px;line-height:1.4}h2{font-size:22px;margin-top:38px;border-top:1px solid #d7ded8;padding-top:22px}a{color:#42696b}table{border-collapse:collapse;width:100%;font-size:14px}th{background:#e3e9e3;text-align:left}td,th{padding:12px;border:1px solid #d8ded8;vertical-align:top}tr:nth-child(even){background:#fff}code{font-size:13px;overflow-wrap:anywhere}nav{display:flex;gap:10px;flex-wrap:wrap}nav a{padding:8px 14px;background:white;border:1px solid #bac9be;border-radius:6px;text-decoration:none}.scroll{overflow:auto}footer{font-size:12px;color:#6b7971;margin-top:40px}@media(max-width:600px){body{font-size:15px}main{padding:20px 16px}h1{font-size:25px}td,th{min-width:110px;padding:9px}}@media print{body{background:white}header,nav{display:none}main{padding:0;max-width:none}tr{break-inside:avoid}table{font-size:11px}h2{break-after:avoid}}</style></head><body><header><b>Wharton Insight AI｜ERP 企业管理</b></header><main><nav><a href="index.html">打开电脑展示版</a><a href="mobile.html">打开手机版</a><a href="Wharton_ERP_离线展示版.html" download>下载离线 HTML</a><a href="Wharton_ERP_展示版_20261125.zip" download>下载完整离线包</a></nav><h1>A6｜功能現況與正式版時間</h1>
+<p>核對日期：2026-11-22。品牌：Wharton Insight AI｜ERP 企業管理。展示畫面基準日：2026-11-27。</p>
+<p>2026-11-25 補充：新增 Factory 四頁及 AI 洞察的離線前端展示狀態；其餘原表保留。這些新增畫面可按展示腳本切換，但不表示正式製造、庫存或 AI 後端已完成。</p>
+<p>本表分開說明「展示版能演示什麼」與「現有正式後端做到哪裡」。正式欄依原始碼與測試核對，未以本次登入線上逐項驗收取代；各功能已發布版本的一致性需另核對。<strong>能操作不等於所有業務規則都已確認，也不等於已完成 RBT Core 重建。</strong></p>
+<h2>狀態怎麼讀</h2>
+<ul>
+<li><strong>能操作</strong>：有輸入、驗證與狀態變化。demo 保存在本機瀏覽器；正式版由後端保存並驗證權限。</li>
+<li><strong>只有畫面</strong>：可查看說明、入口或示例，尚無該項完整業務操作。</li>
+<li><strong>尚未開始</strong>：未找到該能力的可用實作，不列為現場承諾。</li>
+<li>正式時間填「現有實作」表示程式已存在；須完成公司設定與試用驗收才能啟用。未有核定排程的功能，一律寫「待排程」。</li>
+</ul>
+<h2>逐功能誠實表</h2>
+<div class="scroll"><table>
+<thead>
+<tr>
+<th>功能</th>
+<th>展示版狀態與可做的事</th>
+<th>現有正式版狀態與範圍</th>
+<th>正式版時間／啟用前條件</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>工作首頁與主管／老闆總覽</td>
+<td><strong>能操作</strong>：切換視角、統計期間，查看待辦、部門近況、請假／考核／工程及已入帳財務；點回來源。</td>
+<td><strong>能操作</strong>：按授權公司彙總實際資料，不把空資料補成假績效。</td>
+<td>現有實作；先確認各職位可見範圍與需要的指標。</td>
+</tr>
+<tr>
+<td>員工與組織</td>
+<td><strong>能操作</strong>：虛構員工清單、個人資料與公司／部門資訊；人事異動生效後更新。</td>
+<td><strong>能操作</strong>：受限員工資料、任職公司、部門、職務、直屬關係與異動紀錄。</td>
+<td>現有實作；新導入企業需核對名冊欄位與管理關係。</td>
+</tr>
+<tr>
+<td>我的申請與共用簽核</td>
+<td><strong>能操作</strong>：建立、送出、複核、核准、退回修改、撤回及查看歷程；切換角色接續同單。</td>
+<td><strong>能操作</strong>：按公司與申請類型設定複核及 1–3 層核准，避免自己審自己，變更授權即重新檢查。</td>
+<td>現有實作；簽核人、代理人、級數及適用範圍需正式確認。</td>
+</tr>
+<tr>
+<td>請假、補申請與銷假</td>
+<td><strong>能操作</strong>：請假表單、事後補申請、待審撤回、核准後全部／部分銷假、餘額與狀態回饋。</td>
+<td><strong>能操作</strong>：原單保留，調整另經審核；有效假期參與排班衝突檢查，鎖定月份不可任意改動。</td>
+<td>現有實作；假別資格、額度與准假權限須確認。未宣稱已完成柬埔寨法規驗收。</td>
+</tr>
+<tr>
+<td>加班與外勤申請</td>
+<td><strong>能操作</strong>：填寫、送審及結果追蹤。</td>
+<td><strong>能操作</strong>：申請與簽核。<strong>尚未開始</strong>：完整法定加班費、扣薪及薪資連動計算。</td>
+<td>申請流程已有；計薪規則待確認、待排程。</td>
+</tr>
+<tr>
+<td>可視化班表</td>
+<td><strong>能操作</strong>：月份／日期看班次與請假、安排班次、送交另一位主管發布、查看衝突。</td>
+<td><strong>能操作</strong>：班別、草稿／發布班表、跨日工時與重疊檢查，核准請假會影響安排。</td>
+<td>現有實作；先設定班別、休息、工時限制及發布權限。</td>
+</tr>
+<tr>
+<td>GPS／拍照打卡</td>
+<td><strong>能操作（示例）</strong>：操作示例打卡及異常；不作真實出勤證據。</td>
+<td><strong>能操作</strong>：伺服器判斷身分／時間、定位新鮮度／誤差／半徑、照片條件與重複打卡；依政策開關。</td>
+<td>現有實作；實地校準位置與半徑、手機授權及現場試用仍必須做。不是 GPS 防偽或裝置硬體認證。</td>
+</tr>
+<tr>
+<td>補卡／換代班</td>
+<td><strong>能操作</strong>：員工申請、對方回覆、獨立主管審核；結果更新班表。</td>
+<td><strong>能操作</strong>：保留原紀錄、重檢衝突、限制同人自審；換班原子更新，失敗不改一半。</td>
+<td>現有實作；替班候選範圍及主管設定需確認。</td>
+</tr>
+<tr>
+<td>考勤月結</td>
+<td><strong>能操作</strong>：核對異常、送審、另一位主管核准、凍結與有原因重開。</td>
+<td><strong>能操作</strong>：限制未結束月份、未成對打卡／待補卡等未解問題；核准後凍結快照。</td>
+<td>現有實作；核對哪些工時可作計薪依據。考勤工時不等於自動薪資。</td>
+</tr>
+<tr>
+<td>崗位、人力與工作回報</td>
+<td><strong>能操作</strong>：人力需求、安排、複核發布、臨時補位、回報與驗證。</td>
+<td><strong>能操作</strong>：按區域／崗位／部門職務驗證，跨公司服務保留任職公司，補位及回報留歷程。</td>
+<td>現有實作；各廠區／崗位定義及工時政策待導入時設定。</td>
+</tr>
+<tr>
+<td>考核管理</td>
+<td><strong>能操作</strong>：目標與權重、主管確認、員工回報、兩層評分、退回及結果。</td>
+<td><strong>能操作</strong>：確認時凍結目標與評核比重；權限、分數與歷程可核對。</td>
+<td>現有實作；考核週期、目標、評分尺度、比重與後續用途須管理層確認。</td>
+</tr>
+<tr>
+<td>薪資基礎資料與調薪申請</td>
+<td><strong>能操作（示例）</strong>：查看虛構薪資資料與調薪流程。</td>
+<td><strong>能操作</strong>：薪資欄位獨立授權，調薪經審核與生效流程；一般人資／主管不自動取得所有薪資。</td>
+<td>現有實作；需明確授權及公司薪資欄位定義。</td>
+</tr>
+<tr>
+<td>薪資批次、薪資單、社保</td>
+<td><strong>能操作（示例）</strong>：批次輸入、複核／核准／確認、個人薪資單與社保頁；計算屬示例。</td>
+<td><strong>尚未開始</strong>：沒有對等完整的正式自動計薪、社保／稅務計算及申報服務。</td>
+<td>待薪資／會計專業人員確認規則與驗收標準後排程；不能用展示數字承諾合法合規。</td>
+</tr>
+<tr>
+<td>證件與合約</td>
+<td><strong>能操作</strong>：登錄、狀態與到期總覽、附件／版本、跟進續辦及個人提醒。</td>
+<td><strong>能操作</strong>：員工證件登錄、到期／跟進日、狀態與修訂歷程；私有 PDF／圖片上傳下載，個人與管理角色分權。</td>
+<td>現有實作；正式附件現有限單檔 2 MB，每份單據 20 份。提醒擴充與檔案額度另排程。</td>
+</tr>
+<tr>
+<td>人事異動</td>
+<td><strong>能操作</strong>：到職、轉正、職務／部門調整、跨公司調動、調薪、離職與復職；不同角色接續。</td>
+<td><strong>能操作</strong>：獨立複核與核准、到生效日套用、前後差異與歷程；離職停權、跨公司異動重新審視授權。</td>
+<td>現有實作；不會因到職／復職自動開通帳號及全部權限。</td>
+</tr>
+<tr>
+<td>培訓課程與紀錄</td>
+<td><strong>能操作</strong>：課程、參加回覆、出席／時數與個人紀錄。</td>
+<td><strong>能操作</strong>：發布、員工回覆、實際出席登錄、時數／證照類紀錄、取消及更正歷程；收到邀請不等於已出席。</td>
+<td>現有實作；課程與紀錄欄位可先試用。</td>
+</tr>
+<tr>
+<td>表揚、違紀與申覆</td>
+<td><strong>能操作（示例）</strong>：查看與提出示例紀錄，演示審核／申覆動線。</td>
+<td><strong>尚未開始</strong>：未有與 demo 對等的完整正式獎懲／申覆後端。</td>
+<td>待規則、閱覽範圍、申覆層級確認後排程。</td>
+</tr>
+<tr>
+<td>行政專案交辦</td>
+<td><strong>能操作</strong>：主管交辦、期限／里程碑、執行回報、附件連結、驗收或退回。</td>
+<td><strong>能操作</strong>：直接交辦及已核准申請轉執行；受派人回報，另一位有權主管驗收。</td>
+<td>現有實作；先確認哪些交辦值得入系統，與工程專案分開。</td>
+</tr>
+<tr>
+<td>採購申請與供應商</td>
+<td><strong>能操作</strong>：採購需求、複核／核准、狀態追蹤及採購內供應商資料。</td>
+<td><strong>能操作</strong>：採購申請與設定式簽核、供應商資料與權限，核准來源可連到財務處理。</td>
+<td>現有實作；公司簽核層級／金額門檻需確認。不含完整庫存收發、退貨成本或自動付款。</td>
+</tr>
+<tr>
+<td>工程與專案</td>
+<td><strong>能操作</strong>：工作／里程碑、進度、預算項、變更、驗收、文件與版本。</td>
+<td><strong>能操作</strong>：限定工程人員及明確成員、按公司／專案授權；工作、預算、簽認變更影響、驗收與文件各自保存。</td>
+<td>現有實作；預算／變更／驗收權責需確認。工程驗收不會直接發款。</td>
+</tr>
+<tr>
+<td>報支、零用金與財務單據</td>
+<td><strong>能操作</strong>：員工填單、財務複核、主管核准、來源追蹤。</td>
+<td><strong>能操作</strong>：按任職／出帳公司與授權處理，核准單可作會計來源；公司歸屬不因跨公司服務而改寫。</td>
+<td>現有實作；付款人與銀行執行另定，不把核准標示成已匯款。</td>
+</tr>
+<tr>
+<td>公司帳簿與會計傳票</td>
+<td><strong>能操作</strong>：公司別帳、科目、平衡傳票、複核、核准、入帳、沖銷與關帳。</td>
+<td><strong>能操作</strong>：整數最小貨幣單位、公司帳幣別／精度、借貸平衡、獨立簽核、已入帳不可覆寫、期間鎖定。</td>
+<td>現有實作；需財務確認帳簿、科目、期初日／期初數、幣別與簽核人後啟用。</td>
+</tr>
+<tr>
+<td>Excel／CSV 帳務匯入</td>
+<td><strong>能操作</strong>：CSV 文字貼上、預覽、驗證、匯入草稿與錯誤回報；展示版沒有正式版的 .xlsx 檔案讀取器，不能略過入帳簽核。</td>
+<td><strong>能操作</strong>：六表帳務模板／科目對應、期初與日記帳草稿、重複與不平衡防護；不是任意 Excel 都能直接匯入。</td>
+<td>現有實作；新來源格式需先映射與試匯入。</td>
+</tr>
+<tr>
+<td>試算表、總帳、損益、資產負債、現金流</td>
+<td><strong>能操作</strong>：依已入帳示例傳票篩選與查來源。</td>
+<td><strong>能操作</strong>：已入帳計算、月份損益、比較資產負債及現金流草稿；未分類、非現金與混合項需核對。</td>
+<td>現有實作；報表分類／期初數及現金流口徑需財務驗收。不是稅務申報認證。</td>
+</tr>
+<tr>
+<td>通知提醒</td>
+<td><strong>能操作</strong>：鈴鐺、待辦／結果／證件提醒、已讀、點回原單；依角色與公司隔離。</td>
+<td><strong>能操作</strong>：首頁待辦、申請狀態、課程回覆等來源流程；<strong>只有畫面／未齊</strong>：與 demo 完全等效的統一通知中心。</td>
+<td>來源待辦已有；統一提醒中心與定時通知待排程。讀取不等於問題已處理。</td>
+</tr>
+<tr>
+<td>外部 Email／SMS／App 推播</td>
+<td><strong>尚未開始</strong>：不把示例鈴鐺說成真實發送。</td>
+<td><strong>尚未開始</strong>：未有完整定時外發與送達追蹤。</td>
+<td>待選定服務、同意範圍與費用後排程。</td>
+</tr>
+<tr>
+<td>權限與職位代理</td>
+<td><strong>能操作（示例）</strong>：切換角色觀察可見範圍；設定頁可演示分工。</td>
+<td><strong>能操作</strong>：公司 × 功能 × 動作授權、職位／代理期間、會話撤銷、伺服器拒絕越權。</td>
+<td>現有實作；導入前核對權限矩陣。展示角色切換絕不能移到正式登入。</td>
+</tr>
+<tr>
+<td>操作歷程與資料保存</td>
+<td><strong>能操作（示例）</strong>：當前瀏覽器保存及重設示例。</td>
+<td><strong>能操作</strong>：修訂／操作歷程、私人 workspace 交易及快照。<strong>尚未開始</strong>：完整異地備援、還原演練與災難復原服務。</td>
+<td>基本保存已有；正式備援／保留政策與演練需另排程。</td>
+</tr>
+<tr>
+<td>四語與手機網頁</td>
+<td><strong>能操作</strong>：會展版預設簡中，保留繁中／英文／高棉文切換；手機可獨立切角色走流程。工廠及 AI 新頁先提供中文，英文與高棉文待補。</td>
+<td><strong>能操作</strong>：響應式網頁與介面字典，正式手機按真實帳號權限使用。</td>
+<td>現有實作；高棉語需母語校對。員工輸入內容不自動翻譯，舊原生 App 不作本版交付承諾。</td>
+</tr>
+<tr>
+<td>PMS 入口與基本設定</td>
+<td><strong>只有畫面</strong>：前往外部系統入口與資料分工說明。</td>
+<td><strong>能操作</strong>：部分出帳／收費對應設定；<strong>尚未開始</strong>：正式 PMS 資料同步 API。</td>
+<td>入口可接指定網址；完整串接需雙方資料契約、授權及測試環境後排程。</td>
+</tr>
+<tr>
+<td>Kroma、銀行／收款、現有會計系統</td>
+<td><strong>尚未開始</strong>：不以入口或 CSV 代替即時串接。</td>
+<td><strong>尚未開始</strong>：未有正式供應商 API 的收送、重試及對帳完整實作。</td>
+<td>待對方 API、交換欄位、驗收與費用確認後排程。</td>
+</tr>
+<tr>
+<td>多公司與多幣別</td>
+<td><strong>能操作</strong>：公司分開看帳與流程；可說明每本帳的本位幣。</td>
+<td><strong>能操作</strong>：公司別帳簿／權限及帳幣別精度。<strong>尚未開始</strong>：同帳多外幣交易、自動匯率、匯兌損益與合併報表。</td>
+<td>公司分帳已有；完整多幣功能待需求確認後排程。不同幣別不能直接相加。</td>
+</tr>
+<tr>
+<td>Factory：工廠總覽</td>
+<td><strong>只有畫面</strong>：查看預設的工廠數字、進度與提醒；離線前端展示，不連正式工廠資料。</td>
+<td><strong>尚未開始</strong>：未有對應的正式製造總覽後端。</td>
+<td>正式日期待確認；展示畫面不是正式交付承諾。</td>
+</tr>
+<tr>
+<td>Factory：訂單進度</td>
+<td><strong>只有畫面</strong>：查看虛構訂單及預設進度；可依展示腳本切換畫面，不會建立正式訂單。</td>
+<td><strong>尚未開始</strong>：未有完整製造訂單及生產追蹤後端。</td>
+<td>正式日期待確認；待訂單與生產規則定案。</td>
+</tr>
+<tr>
+<td>Factory：物料與庫存</td>
+<td><strong>只有畫面</strong>：查看虛構物料、庫存及缺料提示；不執行正式收發料或成本結算。</td>
+<td><strong>尚未開始</strong>：未有完整庫存收發、成本及盤點後端。</td>
+<td>正式日期待確認；待庫存與成本規則定案。</td>
+</tr>
+<tr>
+<td>Factory：生產日報</td>
+<td><strong>只有畫面</strong>：可提交虛構日報，依前端腳本更新示例訂單良品、庫存與提醒；沒有正式生產後端。</td>
+<td><strong>尚未開始</strong>：未有完整生產回報與資料核驗後端。</td>
+<td>正式日期待確認；待日報欄位與回報流程定案。</td>
+</tr>
+<tr>
+<td>完整製造、庫存與銷售流程</td>
+<td><strong>尚未開始</strong>：上述 Factory 四頁是預覽，未具備 BOM／MRP、製令、庫存成本或完整銷售退貨流程。</td>
+<td><strong>尚未開始</strong>：不是現有 ERP 已完成範圍。</td>
+<td>待需求及產品路線確認；不得用前端展示代替正式製造功能承諾。</td>
+</tr>
+<tr>
+<td>AI 洞察／正式 AI 分析與決策</td>
+<td><strong>只有畫面</strong>：AI 洞察使用預寫內容與前端展示腳本，離線可呈現；沒有呼叫模型，不會真的分析公司資料或執行決策。</td>
+<td><strong>尚未開始</strong>：未有可交付、經驗證的正式 AI 分析／決策服務。</td>
+<td>正式日期待確認；待用例、資料授權與評估定案。</td>
+</tr>
+</tbody></table></div>
+<h2>現場可直接說的界線</h2>
+<ol>
+<li>展示時能完整走「送出 → 複核 → 核准 → 結果」；各角色看到的是同一筆示例的不同階段。</li>
+<li>請假核准後會更新示例假勤總表與班表提示，<strong>不會自動完成正式薪資扣算</strong>。</li>
+<li>財務總覽只計已入帳資料；已核准報支、已驗收工程與實際銀行付款是不同事件。</li>
+<li>目前可以分公司、分權限處理；多租戶 RBT Core 重建、外部串接與薪資法規驗證是後續工作，不以展示日期代替交付承諾。</li>
+</ol>
+<h2>程式與測試依據</h2>
+<p>基準：<code>kyd-erp-workspace</code> 提交 <code>841248c8dacf09b0319823d8200049c5b1e0a113</code>。</p>
+<div class="scroll"><table>
+<thead>
+<tr>
+<th>核對範圍</th>
+<th>主要原始檔／測試</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>權限、申請、看板</td>
+<td><code>cloud/core.mjs</code>、<code>permissions.mjs</code>、<code>positions.mjs</code>、<code>workflow.mjs</code>、<code>dashboard.mjs</code> 及對應 <code>test_*.mjs</code></td>
+</tr>
+<tr>
+<td>假勤、排班、人力</td>
+<td><code>cloud/leave-operations.mjs</code>、<code>attendance.mjs</code>、<code>attendance-flow.mjs</code>、<code>staffing.mjs</code> 及對應測試</td>
+</tr>
+<tr>
+<td>人事、考核、培訓、文件、交辦</td>
+<td><code>cloud/personnel-operations.mjs</code>、<code>performance.mjs</code>、<code>training.mjs</code>、<code>attachments.mjs</code>、<code>tasks.mjs</code>；<code>test_meeting.mjs</code>、<code>test_performance_policy.mjs</code> 等</td>
+</tr>
+<tr>
+<td>採購、工程與其他業務</td>
+<td><code>cloud/business.mjs</code>、<code>core.mjs</code>、<code>workflow.mjs</code> 及對應測試</td>
+</tr>
+<tr>
+<td>會計與模板</td>
+<td><code>cloud/accounting.mjs</code>、<code>accounting-template.mjs</code>、<code>test_accounting.mjs</code>、<code>test_accounting_template.mjs</code></td>
+</tr>
+<tr>
+<td>demo 互動與總覽</td>
+<td><code>demo/leave-applications-content.js</code>、<code>management-overview.js</code>、<code>notifications.js</code>、<code>payroll-content.js</code>、各模組內容檔及 <code>tests/demo_*.test.mjs</code></td>
+</tr>
+</tbody></table></div>
+<p>原 A 包（2026-11-22）實際執行的選定測試：<strong>205 項通過、0 項失敗</strong>。範圍包括正式權限／業務流程與 demo 請假、會計、考核、通知；不代表已完成每一個瀏覽器、手機硬體、外部供應商或法規驗收。</p>
+<p>未填正式完成日的原因是尚無核定重建排程，並非用「已完成 demo」推算正式版時間。A 包先供會展重建；B 包再逐條對照 RBT Core 的資料、狀態、權限與串接規格。</p>
+<footer>更新 2026-11-25 · 展示日期 2026-11-27 · 全部展示资料虚构</footer></main></body></html>
