@@ -108,8 +108,8 @@
   "files": {
     "README.md": "a8fd391ad2fac81f9886ca856d00042c5929f4251b93c4e1992a377860fc13db",
     "THIRD-PARTY.txt": "e2acf6fa67ccb316e11128080de30a25a51465ad3335ce42f4d594ce3ab4e451",
-    "Wharton_ERP_交付包_20261125.zip": "51723882581b74a37411a49b3204e77828a02958c1df5b470e1b884728cc9215",
-    "Wharton_ERP_展示版_20261125.zip": "17e9bb57b9e009c1b5e4f8a18b45e66ba58f18565a480b0349a06dc0349b7944",
+    "Wharton_ERP_交付包_20261125.zip": "e6d9c8993249f4df5b5835506eff29058b7b8aa584df4474457135c0197a019b",
+    "Wharton_ERP_展示版_20261125.zip": "f2d5c6f1a9a315aa0355cb0af9fac513ca7cfd0b94f9b6728cf62b691ebd42a5",
     "Wharton_ERP_手机离线展示版.html": "8f615e63bc4a94e954c1faf8729d75ea0d89dd088f03650c43f4dc104cf255aa",
     "Wharton_ERP_离线展示版.html": "c91bbe9183095536b9dbe576524056dfbe04663c99cdc4223bab0cfc5ead8f1a",
     "accounting-content.js": "88b4f5f3816dbb6d62cc9b8d3f13ee7f5a78a7c66a7017d60cadd4db2fe76530",
@@ -151,7 +151,7 @@
     "i18n-rehearsal.js": "19204b241a018cf4215605c7c9c67a030736a08df1eb6ecea63d9dec6cc25415",
     "i18n.css": "448cb8d7e9e5267ee5b34426d12a07c6e0daa015e49386bebaed8fe945d749cf",
     "i18n.js": "62fb4feb14a956fa9ce6aea4798e9fd81d1f4986ba065893299fedeb086b7ee2",
-    "index.html": "653c89e10db99f9e767b606e5538a3fc1ff1ec2fb6871b82dce4edc87832e67a",
+    "index.html": "e78dc01fdb9afe8740efa8c389b8f2049674efe755c5e5bf8b207d11ae704c6e",
     "launch.command": "61850990f21a1cc99040f351ac385d32ff3f0b0e8f1a1f02d08f8764ed0c58a9",
     "leave-applications-content.js": "510f9fc68e1b883ce122e39076b4bf193acff2f803a3f04fd5e12095cf935330",
     "leave-rules.js": "d54463c60dc053f5e3bddf1fb771d404cc800c91cf9b00eed83ed421aea6b86a",
@@ -163,7 +163,7 @@
     "mobile-shell.js": "cfe7538d5e0c052b7a95f97f3b9aa596e238b7d07b3f49e9271455178f5a5d2a",
     "mobile-tables.css": "b88250c5a74737e1a8921dca0b7b4fe8c067aeac63a741c06ab9e03366c97c6c",
     "mobile-tables.js": "d3e5d14169cc974eb9ca8b81767643dd87adeb449e8d41eaeb6784b3e2a16839",
-    "mobile.html": "be936dfed2550168a3481c0afced63c716ac3d9039762e57fd1ce0da040ddc58",
+    "mobile.html": "bcb436eb3118f90cbff57559d94a093ee5e8587ad476709979540f8a5466da66",
     "notifications.js": "c1f2e58befd11b57c723b36cd4fac273f75fd100af0399d536f61f66fc265c32",
     "payroll-content.js": "8d24101cf65db8c74886cf675418fdba69f1fac9396805aa6428964fcc1762bf",
     "performance.js": "7981d81811af0273d92e684152df3ee4a2480fe0ab8e9ff27d3d86b682106f1b",
@@ -191,5 +191,6 @@
   "deliveryRevision": "2026-11-25.6",
   "rehearsalRevision": "2026-11-25",
   "fontRevision": "2026-11-25.4",
-  "guide": "演示讲稿.html"
+  "guide": "演示讲稿.html",
+  "assetRevision": "font-css-20261125.4"
 }
