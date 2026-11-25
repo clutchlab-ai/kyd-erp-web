@@ -1,0 +1,76 @@
+name: Publish website
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  package:
+    name: Validate and package the complete website
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read
+    steps:
+      - name: Check out the published revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Prepare Pages
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+      - name: Validate and stage tracked website files
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir _site
+          git archive HEAD | tar -x -C _site
+          rm -rf _site/.github
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path('_site')
+          for name in ('index.html', 'demo/index.html', 'showcase/index.html', 'showcase/mobile.html'):
+              if not (root / name).is_file():
+                  raise SystemExit(f'Missing website entry: {name}')
+          manifest = json.loads((root / 'showcase/verification.json').read_text())
+          for name, expected in manifest['files'].items():
+              path = root / 'showcase' / name
+              if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != expected:
+                  raise SystemExit(f'Showcase verification failed: {name}')
+          release = {
+              'commit': os.environ['GITHUB_SHA'],
+              'showcaseVersion': manifest['version'],
+              'runId': os.environ['GITHUB_RUN_ID'],
+          }
+          for folder in (root, root / 'showcase'):
+              (folder / 'site-release.json').write_text(json.dumps(release, indent=2) + '\n')
+          print(f"Verified {len(manifest['files'])} showcase files; staged the complete website.")
+          PY
+      - name: Upload the complete website
+        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
+        with:
+          path: _site
+
+  deploy:
+    name: Publish to the original Pages address
+    needs: package
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy Pages
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5
