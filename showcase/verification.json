@@ -81,10 +81,20 @@
       ],
       "runtimeErrors": 0,
       "externalRequests": 0
+    },
+    "delivery-copy": {
+      "checks": [
+        "Recipient-facing wording and factual action/result tables",
+        "Offline entry and guide filenames resolve",
+        "Application binaries unchanged",
+        "ZIP integrity verified"
+      ],
+      "runtimeErrors": 0,
+      "externalRequests": 0
     }
   },
   "files": {
-    "README.md": "392a274eab147c17cea329c18c9335af36f0257537268d0c59692c88df015d72",
+    "README.md": "e3ea8c97ef19ab461f1999f58bc325833d0418b720dd91a3f1e292ac5007a8c2",
     "THIRD-PARTY.txt": "b39a13106b13d57f248cec44cdaaf329c7dfcfadb9cd1524efabe9484cae7fb6",
     "Wharton_ERP_手机离线展示版.html": "fd8ae94d8b9ce39c9ea07f106bfb31f65c85260fd8b3507615a6b00c5201839e",
     "Wharton_ERP_离线展示版.html": "ef4d7dd04465ebeefda636526a542360af8a32146bbefb855ae43c9b90f9c4a9",
@@ -144,11 +154,11 @@
     "vendor/OpenCC-THIRD-PARTY.md": "42c7dbe71c178fcca97ba945e9ac9ff360fb69bbfea4cb50556f6c65bfa59806",
     "vendor/OpenCC-data-Apache-2.0.txt": "b534e465949558eec2597b04f5092b5e161236a68dfbfd04d547592ac3964308",
     "vendor/opencc-1.4.2.js": "95b04abf136d9c28263773bb7d357eac80b7954d101efd23c4d09c737d3d379e",
-    "功能现况.html": "6f6cff4ca18283d167c38993af52b47b5b0dc2e6be958e997b469678a7c178db",
-    "排练操作.html": "4cada9586938c91d00d6fa84bb47ebfaccc660284b354246186c8fa2be1e0ea5",
-    "排练操作.md": "9100814cb36e499945b76c559b683ce159cd951012d2c6df49f2f50ecc6a7052",
-    "delivery.html": "423c9a6cd0013f304c59acebda7c55fe08ee75df44578592146fc4343e2bd4a6",
-    "Wharton_ERP_交付包_20261125.zip": "ddd3bc4daa4125e81f3a1eaa73ca1c3ae43bd8f4e29762c8cfd9a9eadefa896a"
+    "功能现况.html": "18b3537acd4dc12e8d099b85238a37c3ef93196f47db4c793c3b79a600ff879a",
+    "排练操作.html": "da25c203acb4a91796a2de5c3838dddb9b4f42034fec9d723cfe5cbae7678451",
+    "排练操作.md": "73afcfe897d99de3b1ca5eb98f0e10b6c06468a9261df557b9c1662cd1ed997b",
+    "delivery.html": "0da6bd0dec552a13cf083bcc4f73f9271baba82960d4d7ff1e60a37348ecb4dc",
+    "Wharton_ERP_交付包_20261125.zip": "76b9245f47138e8185056b25374699a1d8b4ea4eac44bb97230a80d6433d77ba"
   },
-  "deliveryRevision": "2026-11-25.2"
+  "deliveryRevision": "2026-11-25.3"
 }
