@@ -1,5 +1,5 @@
 {
-  "version": "2026-11-25.4",
+  "version": "2026-11-25.5",
   "eventDate": "2026-11-27",
   "defaultLanguage": "zh-Hans",
   "languages": [
@@ -81,6 +81,17 @@
       "runtimeErrors": 0,
       "externalRequests": 0
     },
+    "fonts": {
+      "checks": [
+        "desktop and mobile source rendering",
+        "desktop and mobile offline rendering with zero external requests",
+        "bundled CJK glyphs used for company, person, order, arrow, checkmark and form controls",
+        "bundled Khmer glyphs and shaping loaded",
+        "four-language switching preserves business data"
+      ],
+      "runtimeErrors": 0,
+      "externalRequests": 0
+    },
     "rehearsal": {
       "checks": [
         "four-story role handoffs executed in fresh browser",
@@ -93,25 +104,25 @@
       ],
       "runtimeErrors": 0
     },
-    "fonts": {
+    "executiveNavigation": {
       "checks": [
-        "desktop and mobile source rendering",
-        "desktop and mobile offline rendering with zero external requests",
-        "bundled CJK glyphs used for company, person, order, arrow, checkmark and form controls",
-        "bundled Khmer glyphs and shaping loaded",
-        "four-language switching preserves business data"
+        "CEO and chairman home: Overview / HR overview / My work and requests",
+        "single HR entry and no obsolete chairman dashboard button",
+        "real HR table, filters, personal work and back navigation",
+        "employee, HR and manager scope unchanged",
+        "desktop and mobile; source and offline standalone"
       ],
       "runtimeErrors": 0,
       "externalRequests": 0
     }
   },
   "files": {
-    "README.md": "a8fd391ad2fac81f9886ca856d00042c5929f4251b93c4e1992a377860fc13db",
+    "README.md": "0169ea45664a86a96471599d2b179c24b5adde40e2c06ede9775c352f3753189",
     "THIRD-PARTY.txt": "e2acf6fa67ccb316e11128080de30a25a51465ad3335ce42f4d594ce3ab4e451",
-    "Wharton_ERP_交付包_20261125.zip": "e6d9c8993249f4df5b5835506eff29058b7b8aa584df4474457135c0197a019b",
-    "Wharton_ERP_展示版_20261125.zip": "f2d5c6f1a9a315aa0355cb0af9fac513ca7cfd0b94f9b6728cf62b691ebd42a5",
-    "Wharton_ERP_手机离线展示版.html": "8f615e63bc4a94e954c1faf8729d75ea0d89dd088f03650c43f4dc104cf255aa",
-    "Wharton_ERP_离线展示版.html": "c91bbe9183095536b9dbe576524056dfbe04663c99cdc4223bab0cfc5ead8f1a",
+    "Wharton_ERP_交付包_20261125.zip": "2105aa390ecdd8fef2fb586b06e682f1ca08b028d8bd4842c8c7543e3ba68c31",
+    "Wharton_ERP_展示版_20261125.zip": "0cb7ae98fe778fc0b94a1ccc3164334b8e282b62f5e9866d7b7eb2017e3f05d7",
+    "Wharton_ERP_手机离线展示版.html": "f7bdb6dfc1335a95094f64192711f1e605d0cfa2d326456084181446c0f18059",
+    "Wharton_ERP_离线展示版.html": "74b53f349003dcb53443033bc50511a0907bc333f8df9f0a62dee59c9d0dc7ab",
     "accounting-content.js": "88b4f5f3816dbb6d62cc9b8d3f13ee7f5a78a7c66a7017d60cadd4db2fe76530",
     "accounting-template.css": "98109ca78605745567afc18443adc2ae9343df91785264ee35dc8d6e1391c053",
     "accounting-template.js": "2d44f36810b342f3db5be27700c8b12a7c0535033d3491a46569682d0bf1bcd4",
@@ -123,11 +134,11 @@
     "brand-logo.jpg": "4ff821225856dc5fc53e545cd6715e349fc58ac3f01b03c9f875cca2f2089d93",
     "business.js": "3f54663069b444a3e5daf7ad82c82360e5589019d6b64fdb48c4347f0cb47995",
     "core.js": "ce15059c659c6738f5442d295d65222f96f4e47bf2fd3b0800c1994123c6d991",
-    "delivery.html": "4dafa7c52ff4992a824b53cff9d6483768dc40ff4c81697e79ce654ad37ce5f9",
+    "delivery.html": "3af8401d4af42036f08d933c9c0984662ee44dc7978e54ed865be4de7fbd9942",
     "demo.css": "e1595a2c155a33430ba8829a21fa2ecf1211361e8d3a48019a828eb45f29e7b0",
     "engineering-content.js": "bd9fcf5c88a6f66ef1bed26cfc0e3181cf6bb4bae41d6f8de693ae482fba5ee0",
     "exhibition-shell.css": "45fea2e69b8b2f036d1ee4af74da6576ecc51e2f38ad654cd895feffb5dca6e5",
-    "exhibition-shell.js": "1e346d3810020852e0d80010e2cb1879596d60540836e8e392be11f6f2a0651e",
+    "exhibition-shell.js": "4875ec456458f09f9bc4e1717991568f2c3f49bee8ffabbeabe0da8727e8bc4c",
     "factory-preview.css": "430cfae0320232bb7f093ceef04adefac65da26c3ac17a03251dc7a94c08db23",
     "factory-preview.js": "a3b7506f78be1a8e21ab957da0bd4d20dddd2fcd3fa14e612523270a158d2a17",
     "fonts/CJK-OFL.txt": "6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2",
@@ -138,7 +149,7 @@
     "fonts/wharton-han-regular.woff2": "771d140f84658f64cb6be7208d242e9d4b63504b85630456c0115a84b2e71fa2",
     "fonts/wharton-khmer.woff2": "ee69fa18c6fcd232700d2ed6e5df22d81e1792dea0321023288711762427f4e2",
     "hr-workbench.css": "9564200bbd04cb8deaccd63e5af01cbaf81519d8172839a4b490d8741747ca6f",
-    "hr-workbench.js": "7e8abf51651a3d97e39b9a9bfdb0432e0b7cc8824a378f97563595008e03695b",
+    "hr-workbench.js": "9454c91aff381b04f27c77be4c4a7953dd5babbc7dd75798f59a89c633318af0",
     "hr.js": "085b29eaf35f62cf86e3b39b3728e51b41e97fa6510992a54c7cdbc00f78909a",
     "i18n-accounting-template.js": "8ed58d3c19ca97773e1eb552cc830a4bb86105d59ca6e1c2a4d7df12737dae86",
     "i18n-base.js": "03a2b52516faf335dcd74ca93115f0c9e37498561a5ad7cfff9ee601ba2a1b10",
@@ -151,19 +162,19 @@
     "i18n-rehearsal.js": "19204b241a018cf4215605c7c9c67a030736a08df1eb6ecea63d9dec6cc25415",
     "i18n.css": "448cb8d7e9e5267ee5b34426d12a07c6e0daa015e49386bebaed8fe945d749cf",
     "i18n.js": "62fb4feb14a956fa9ce6aea4798e9fd81d1f4986ba065893299fedeb086b7ee2",
-    "index.html": "e78dc01fdb9afe8740efa8c389b8f2049674efe755c5e5bf8b207d11ae704c6e",
+    "index.html": "6f74dfc4a276afe0c223bf52f4908ca238ebcc663e0e10017a018fc9e30ca0c8",
     "launch.command": "61850990f21a1cc99040f351ac385d32ff3f0b0e8f1a1f02d08f8764ed0c58a9",
     "leave-applications-content.js": "510f9fc68e1b883ce122e39076b4bf193acff2f803a3f04fd5e12095cf935330",
     "leave-rules.js": "d54463c60dc053f5e3bddf1fb771d404cc800c91cf9b00eed83ed421aea6b86a",
     "local-attachments.js": "950d9fee2d1a72f50e501eb565290e82d58febb93238e669ce69a6ec0403cb50",
     "management-overview.css": "3962f0e4a3dec8246f0afe67d74b190c666928d0f25c3a12ffffecd5238437e4",
-    "management-overview.js": "b64c33d3e7e048f56b5c48b3a2783f027e9a5b34794483736a3c90f48252fee1",
+    "management-overview.js": "9869c57de81a89500870a82e09780085b133958913651d046d195b438be755fe",
     "meeting-requests.js": "cec491d276b043038f197e048adeca586913cf3c0b47d89d348a39337a78ba30",
     "mobile-shell.css": "c5a33a47b4f81cbb19bea8d6374d2a0c76cde5408407aa31702bfc1ec19afefc",
-    "mobile-shell.js": "cfe7538d5e0c052b7a95f97f3b9aa596e238b7d07b3f49e9271455178f5a5d2a",
+    "mobile-shell.js": "0db369e074e5de70d1a80cfe5100777d2445bdd43de1507837dc88bedea51c12",
     "mobile-tables.css": "b88250c5a74737e1a8921dca0b7b4fe8c067aeac63a741c06ab9e03366c97c6c",
     "mobile-tables.js": "d3e5d14169cc974eb9ca8b81767643dd87adeb449e8d41eaeb6784b3e2a16839",
-    "mobile.html": "bcb436eb3118f90cbff57559d94a093ee5e8587ad476709979540f8a5466da66",
+    "mobile.html": "944bdc6a3ddcb20e5657fa86d0c08ac8262a0188ea2fd3202f02d36747f73b87",
     "notifications.js": "c1f2e58befd11b57c723b36cd4fac273f75fd100af0399d536f61f66fc265c32",
     "payroll-content.js": "8d24101cf65db8c74886cf675418fdba69f1fac9396805aa6428964fcc1762bf",
     "performance.js": "7981d81811af0273d92e684152df3ee4a2480fe0ab8e9ff27d3d86b682106f1b",
@@ -185,12 +196,13 @@
     "功能现况.html": "0fad285dee984fe78816f562e4a160e18a7f94174b5c230f110d84c843946f48",
     "排练操作.html": "d6820e0fe45a31499032041eef405bfd712715fffd24354a46c5f16b29f182ef",
     "排练操作.md": "4e7218a4a9f3223aaa67f60ccfe3e166338b04ce857e54b8e835f5154b700c91",
-    "演示讲稿.html": "18713c75b49930b9888843e7426264c0c8a8f12356e11ce737e4893479da5d65",
-    "演示讲稿.md": "56b083323375c1152cfbe159e2ff7d0768b80447101c9451650c2d30f9dabe0e"
+    "演示讲稿.html": "987e8237a2a24897a90a271a69c613248ec42d71e976e4a628269ac956e7f162",
+    "演示讲稿.md": "b2ab047abe54589f1923d0146e0ece993c9c22cf6123518d6ab929d5a058831d"
   },
-  "deliveryRevision": "2026-11-25.6",
+  "deliveryRevision": "2026-11-25.7",
   "rehearsalRevision": "2026-11-25",
   "fontRevision": "2026-11-25.4",
-  "guide": "演示讲稿.html",
-  "assetRevision": "font-css-20261125.4"
+  "executiveNavigationRevision": "2026-11-25.5",
+  "assetRevision": "20261125.5",
+  "guide": "演示讲稿.html"
 }

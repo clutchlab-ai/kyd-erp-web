@@ -84,7 +84,7 @@
  }
  document.addEventListener('submit',e=>{const f=e.target.closest?.('[data-hr-overview-filter]');if(!f)return;e.preventDefault();D.go('hr-overview',Object.fromEntries(new FormData(f)));});
  D.register('hr-overview',{title:'人事管理總覽',group:'總覽',nav:false,navParent:'home',roles:viewers,canView:allowed,render});
- const oldHome=D.modules.home.render;D.modules.home.render=r=>['hr','hrmanager','manager'].includes(D.role)&&r?.dashboard!=='work'?render(r):oldHome(r)+(allowed()?`<div class="action-row space-top">${link('人事管理總覽','hr-overview')}</div>`:'');
+ const oldHome=D.modules.home.render;D.modules.home.render=r=>['hr','hrmanager','manager'].includes(D.role)&&r?.dashboard!=='work'?render(r):oldHome(r)+(allowed()&&(!['ceo','chairman'].includes(D.role)||(r?.dashboard==='work'&&!D.mobileActive))?`<div class="action-row space-top">${link('人事管理總覽','hr-overview')}</div>`:'');
  for(const view of ['documents','attendance','leave']){const original=D.modules[view].render;D.modules[view].render=r=>{
   const html=original(r);if(!r?.hrBack||!allowed())return html;const saved=Object.fromEntries(new URLSearchParams(r.hrBack));return `<div class="action-row space-top">${link('返回管理總覽','hr-overview',params(saved))}</div>`+html;
  };}
