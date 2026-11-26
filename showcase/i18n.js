@@ -30,15 +30,16 @@
  const regexEscape=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
  function loadCatalogs(){
   exact.clear();templates.length=0;
-  for(const [zh,en,km] of rows(window.SFM_I18N))if(zh&&en&&km)exact.set(zh,{en,km});
+  for(const [zh,en,km] of rows(window.SFM_I18N))if(zh&&en&&km){exact.set(zh,{en,km});exact.set(mainland(zh),{en,km});}
   for(const [zh,en,km] of rows(window.SFM_I18N_TEMPLATES)){
    if(!zh||!en||!km)continue;
-   const parts=[],keys=[],ui=[];let cursor=0;const pattern=/\{([A-Za-z_]\w*|\d+)(:ui)?\}/g;let m;
-   while((m=pattern.exec(zh))){parts.push(regexEscape(zh.slice(cursor,m.index)),'([\\s\\S]*?)');keys.push(m[1]);ui.push(!!m[2]);cursor=m.index+m[0].length;}
+   const parts=[],keys=[],ui=[],numeric=[];let cursor=0;const pattern=/\{([A-Za-z_]\w*|\d+)(:ui|:num)?\}/g;let m;
+   while((m=pattern.exec(zh))){parts.push(regexEscape(zh.slice(cursor,m.index)),m[2]===':num'?'([+-]?[0-9]+(?:[.,][0-9]+)*)':'([\\s\\S]*?)');keys.push(m[1]);ui.push(m[2]===':ui');numeric.push(m[2]===':num');cursor=m.index+m[0].length;}
    if(!keys.length){exact.set(zh,{en,km});continue;}
    parts.push(regexEscape(zh.slice(cursor)));
    // Require literal UI context; an all-placeholder entry must never match user data.
-   if(zh.replace(pattern,'').replace(/[\s·:：/／→—,，.。()%％\[\]（）-]/g,'').length<2)continue;
+   const literal=zh.replace(pattern,'').replace(/[\s·:：/／→—,，.。()%％\[\]（）-]/g,'');
+   if(literal.length<(numeric.every(Boolean)?1:2))continue;
    templates.push({zh,en,km,keys,ui,regex:new RegExp('^'+parts.join('')+'$'),literalLength:zh.length-keys.length*4});
   }
   templates.sort((a,b)=>b.literalLength-a.literalLength);
@@ -49,11 +50,13 @@
  function collectProtected(){
   nameValues.clear();freeValues.clear();
   const visited=new WeakSet();
-  function scan(value,key='',depth=0){
+  // Configured shift, account and material labels are UI vocabulary, not personal identities.
+  const semanticField=path=>/^(?:attendanceDemo\.shifts\.\d+|accountingContents\.books\.[^.]+\.accounts\.\d+|factoryPreview\.materials\.\d+|factoryPreview\.reports\.\d+\.materials\.\d+)\.name$/.test(path)||/^(?:people|personnelContent\.profiles)\.\d+\.title$/.test(path);
+  function scan(value,key='',depth=0,path=''){
    if(depth>12||value==null)return;
-   if(typeof value==='string'){if(identityKeys.test(key)&&value.trim())nameValues.add(value.trim());if(dataKeys.test(key)&&value.trim())freeValues.add(value.trim());return;}
+   if(typeof value==='string'){if(!semanticField(path)){if(identityKeys.test(key)&&value.trim())nameValues.add(value.trim());if(dataKeys.test(key)&&value.trim())freeValues.add(value.trim());}return;}
    if(typeof value!=='object'||visited.has(value))return;visited.add(value);
-   if(Array.isArray(value))value.forEach(v=>scan(v,key,depth+1));else for(const [k,v] of Object.entries(value))scan(v,k,depth+1);
+   if(Array.isArray(value))value.forEach((v,i)=>scan(v,key,depth+1,path+'.'+i));else for(const [k,v] of Object.entries(value))scan(v,k,depth+1,path?path+'.'+k:k);
   }
   scan(D.state);for(const p of Object.values(D.roles||{}))if(p.name)nameValues.add(p.name);
   for(const value of explicitProtected){nameValues.add(value);freeValues.add(value);}
@@ -67,14 +70,20 @@
   if(value.length<=5000)for(const template of templates){
    const found=template.regex.exec(value);if(!found)continue;
    const args={};template.keys.forEach((key,i)=>args[key]=translate(found[i+1],{free:!template.ui[i],depth:depth+1}));
-   return prefix+template[language].replace(/\{([A-Za-z_]\w*|\d+)(?::ui)?\}/g,(full,key)=>Object.hasOwn(args,key)?args[key]:full)+suffix;
+   return prefix+template[language].replace(/\{([A-Za-z_]\w*|\d+)(?::ui|:num)?\}/g,(full,key)=>Object.hasOwn(args,key)?args[key]:full)+suffix;
   }
+  // Navigation arrows decorate complete labels; preserve the symbol while translating the label.
+  const arrow=value.match(/^([←→↑↓]\s+)([\s\S]+)$|^([\s\S]+?)(\s+[←→↑↓])$/);
+  if(arrow){const label=arrow[2]||arrow[3],translated=translate(label,{free,depth:depth+1});if(translated!==label)return prefix+(arrow[1]||'')+translated+(arrow[4]||'')+suffix;}
+  // A known UI label can precede a stored record title; keep the title data-protected.
+  const labelled=value.match(/^([^：:\n]+)([：:]\s*)([\s\S]+)$/);
+  if(labelled&&exact.has(labelled[1])&&!protectedValue(labelled[1]))return prefix+translate(labelled[1],{depth:depth+1})+labelled[2]+translate(labelled[3],{free:true,depth:depth+1})+suffix;
   // A colon can be its own label prefix after an adjacent element. Keep it intact.
   const colon=value.match(/^([：:]\s*)(\S[\s\S]*)$/);
   if(colon){const tail=translate(colon[2],{free,depth:depth+1});if(tail!==colon[2])return prefix+colon[1]+tail+suffix;}
   // These delimiters join independently rendered labels/names. Never replace words inside prose.
   const pieces=value.split(/(\s+·\s+|\s*・\s*|\s+→\s+|\s+\/\s+|\n)/);
-  if(pieces.length>1){const output=pieces.map((part,i)=>i%2?part:translate(part,{free:false,depth:depth+1})).join('');if(output!==value)return prefix+output+suffix;}
+  if(pieces.length>1){const output=pieces.map((part,i)=>i%2?part:translate(part,{free,depth:depth+1})).join('');if(output!==value)return prefix+output+suffix;}
   return raw;
  }
  function isIgnored(el){return !el||!!el.closest('script,style,noscript,textarea,input,[contenteditable]:not([contenteditable="false"]),[data-i18n-ignore],[translate="no"],.i18n-control')||(language!=='zh-Hans'&&!!el?.closest('.phone-avatar,svg'));}
