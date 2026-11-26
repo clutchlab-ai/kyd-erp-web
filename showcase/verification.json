@@ -1,5 +1,5 @@
 {
-  "version": "2026-11-26.2",
+  "version": "2026-11-26.3",
   "eventDate": "2026-11-27",
   "defaultLanguage": "zh-Hans",
   "languages": [
@@ -85,10 +85,67 @@
     }
   },
   "checks": {
-    "khmerWorkflow": {
-      "checkpoints": 37,
-      "runtimeErrors": 0,
-      "formLanguageRoundtrip": true
+    "languageAudit": {
+      "locales": [
+        "zh-Hans",
+        "zh-Hant",
+        "en",
+        "km"
+      ],
+      "pageContextsPerDevice": {
+        "desktop": 1059,
+        "mobile": 1059
+      },
+      "pageLocaleChecks": 8472,
+      "primaryWorkflowRuns": 8,
+      "primaryWorkflowRunsPassed": 8,
+      "sameBusinessResults": true,
+      "workflowCaptures": 424,
+      "openers": {
+        "desktop": {
+          "candidates": 335,
+          "modalOpenings": 296
+        },
+        "mobile": {
+          "candidates": 345,
+          "modalOpenings": 301
+        }
+      },
+      "alternativeDialogs": 18,
+      "alternativeDialogLocaleChecks": 72,
+      "alternativeActions": [
+        "kpi-return",
+        "kpi-review-return",
+        "pc-reopen",
+        "pc-return",
+        "pc-revise",
+        "purchase-edit",
+        "purchase-return"
+      ],
+      "targetedFinalCaptures": 34,
+      "targetedLocaleChecks": 136,
+      "registeredHandlers": 206,
+      "renderedHandlers": 126,
+      "clickedHandlers": 113,
+      "remainingUiFindings": 0,
+      "javascriptErrors": 0,
+      "openerErrors": 0,
+      "layoutErrors": 0
+    },
+    "fourLocaleWorkflows": {
+      "runs": 8,
+      "checkpointsPerRun": 53,
+      "identicalBusinessResults": true,
+      "runtimeErrors": 0
+    },
+    "personnel": {
+      "paths": 12,
+      "transitions": 48
+    },
+    "attachments": {
+      "languages": 4,
+      "keyboardAndMouse": true,
+      "fileNamesAndContentsPreserved": true
     },
     "offlinePresenter": {
       "stages": 10,
@@ -109,40 +166,40 @@
     ]
   },
   "files": {
-    "README.md": "0be6a2bb61a1568810b01a8b370571c9d185d0878a6ede128d8aed7c24242438",
+    "README.md": "6b364349823db99504ee693bdab1d76f11f7aa5fa2fca02f99333817604aa3e0",
     "THIRD-PARTY.txt": "e2acf6fa67ccb316e11128080de30a25a51465ad3335ce42f4d594ce3ab4e451",
-    "Wharton_ERP_交付包_20261125.zip": "b34f379123e99b7ded3cb504382e2111540b2ed196c157f01426e295c07af0e1",
-    "Wharton_ERP_展示版_20261125.zip": "503431ba5dda3383f7385ff26dc785174145773ef0c628ebf84c9343508cc416",
-    "Wharton_ERP_手机离线展示版.html": "d9feb30c74ae28c57d56f257c110d952829fe3c4f33d706dc8d6d35cb69936dd",
-    "Wharton_ERP_离线展示版.html": "ba667ba2494e8a5600207a189c1db6bcd3a23baeef605feddcd7c4c54e7174c6",
+    "Wharton_ERP_交付包_20261125.zip": "b5298a1084bd6bf663f4563268af20c562f7086e8976e48919bd73d035cc7471",
+    "Wharton_ERP_展示版_20261125.zip": "cb05aded3abec36413707ccda06b2cff4d0771739b278d36a8d5a289ef6d08ae",
+    "Wharton_ERP_手机离线展示版.html": "6ee77887a13b8c24e22782e1e589a4d0eedfdec520c316c36df7677a7100834d",
+    "Wharton_ERP_离线展示版.html": "d82780ae41238a178ab47f094fb417a86394c7f516dfa3d6f763f993da96f964",
     "accounting-content.js": "88b4f5f3816dbb6d62cc9b8d3f13ee7f5a78a7c66a7017d60cadd4db2fe76530",
     "accounting-template.css": "98109ca78605745567afc18443adc2ae9343df91785264ee35dc8d6e1391c053",
-    "accounting-template.js": "2d44f36810b342f3db5be27700c8b12a7c0535033d3491a46569682d0bf1bcd4",
+    "accounting-template.js": "9e72270c6242ea8fe212aec4cf2e6d2c58fd83da8719df46aa55fa1832558dda",
     "admin-settings-content.js": "ad0203c467fa234a6a36794db36ce1369f1b6451f6dc2fa9a771c5e1d8424810",
     "ai-preview.css": "acdef97b0f91782e9f27d05f911789e835065b822f247838a9c0eaf998601e18",
-    "ai-preview.js": "ba271df283fe0d01b558df8cb83e2651a2f894c5df00257e348bcaa6d4597210",
+    "ai-preview.js": "f99a05cc12393215dfeead4d6728faa27391afa376934e092404c90b50686e06",
     "attendance.js": "1702376deb71598127b4553d9ecaee94b7d13c6ed29e4caf62904bd7eb0793d6",
     "boot.js": "d870019e95806867db4aea29bad1ebe171185950506977f29595b1bdad52ed97",
     "brand-logo.jpg": "4ff821225856dc5fc53e545cd6715e349fc58ac3f01b03c9f875cca2f2089d93",
-    "business.js": "3f54663069b444a3e5daf7ad82c82360e5589019d6b64fdb48c4347f0cb47995",
+    "business.js": "265dc659fa6a17780a68c8b65c1ea68bb61e2a6b064982902e1f089feaf5f4dc",
     "core.js": "ce15059c659c6738f5442d295d65222f96f4e47bf2fd3b0800c1994123c6d991",
-    "delivery.html": "9dd6cccfb08b5394c784453e3fc83c8cfe5e110e0f162bd53f0dc161754a9658",
-    "demo.css": "e1595a2c155a33430ba8829a21fa2ecf1211361e8d3a48019a828eb45f29e7b0",
+    "delivery.html": "9f28df3e503165c7f422c4951612c165105335c4f8ca8e4f5d9d073507a909ad",
+    "demo.css": "97a36c381f95b3ba61a4066d7ef178e058b7f5dc8c4f1906b3236fe61d722a2d",
     "engineering-content.js": "bd9fcf5c88a6f66ef1bed26cfc0e3181cf6bb4bae41d6f8de693ae482fba5ee0",
     "exhibition-shell.css": "45fea2e69b8b2f036d1ee4af74da6576ecc51e2f38ad654cd895feffb5dca6e5",
-    "exhibition-shell.js": "5926648bf38901d25740ddf8d409083fe1e2764649a6c5c7bba197b88d4bf9d8",
+    "exhibition-shell.js": "8a755d08493f0b3c540e1a1e85fd71d6c153d13dc5f96d2bd60b53774afa0442",
     "factory-preview.css": "430cfae0320232bb7f093ceef04adefac65da26c3ac17a03251dc7a94c08db23",
     "factory-preview.js": "a3b7506f78be1a8e21ab957da0bd4d20dddd2fcd3fa14e612523270a158d2a17",
     "fonts/CJK-OFL.txt": "6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2",
     "fonts/Khmer-OFL.txt": "be0407f060aea48787ff9e75d8d3aedef70aef113b3ce9aca26fdaacd10b1870",
     "fonts/README.md": "39d6f69409b039a423a9d8ff4fae76ebd0ac7a26a706fc34b3a5f65d870b54f5",
-    "fonts/manifest.json": "f71e0ae352804b8266cd37d3a74299d702f3a44166ba6301a5264be08639e2ef",
-    "fonts/wharton-han-bold.woff2": "770be7b24b0784ea31e366be23e4aa3e52d2f2a37453ef903389d9aea45b9b2d",
-    "fonts/wharton-han-regular.woff2": "771d140f84658f64cb6be7208d242e9d4b63504b85630456c0115a84b2e71fa2",
+    "fonts/manifest.json": "7b8007e3427b807bfa0af713f7e70845cbdb71ff04f6660136e971aefafc80ca",
+    "fonts/wharton-han-bold.woff2": "514a7d643b439554fb35e51fd762dd69f197feb5167fa8c11b97da088cd9bf40",
+    "fonts/wharton-han-regular.woff2": "354a15851dfb070a5dd363dbcc71d22ca65a955636b4619ec46cc0a499ad512a",
     "fonts/wharton-khmer.woff2": "ee69fa18c6fcd232700d2ed6e5df22d81e1792dea0321023288711762427f4e2",
     "hr-workbench.css": "9564200bbd04cb8deaccd63e5af01cbaf81519d8172839a4b490d8741747ca6f",
     "hr-workbench.js": "9454c91aff381b04f27c77be4c4a7953dd5babbc7dd75798f59a89c633318af0",
-    "hr.js": "085b29eaf35f62cf86e3b39b3728e51b41e97fa6510992a54c7cdbc00f78909a",
+    "hr.js": "8bbfef5dd782bf94578337893257e69b7ed1375c715bd31fdc0d2d1b91f746af",
     "i18n-accounting-template.js": "8ed58d3c19ca97773e1eb552cc830a4bb86105d59ca6e1c2a4d7df12737dae86",
     "i18n-audit-business.js": "dbd8c5fe536f49c5802f64556cabe2554aec0b166c8cb097974873535d9f409f",
     "i18n-audit-hr.js": "fd8632aafc353a6cc9536107e6dd52550ee051a45929d30ad765c753a3dcf1a3",
@@ -150,32 +207,34 @@
     "i18n-business.js": "71e094d6c715d98a1cf02852c4d8bc7875c5227fba466cd3f5efc7aba48ef91a",
     "i18n-common-extra.js": "9c52ad88728d42ebb22bb54b392d13d428304ee1047eeb29a8bbb169d22aff46",
     "i18n-common.js": "17944b14804c1432ffbbc413630a8179d835d618ae11ac384919cab759ff18df",
+    "i18n-fixture-baseline.js": "d70eed42976b6d5d7b7e9cb2fe0cdd3224fdd8f1edc05bec6610e6778b456204",
     "i18n-hr-workbench.js": "659d4b8b2969e94da5d3fa223a5294def9934fad15ef79803ac83c41406b2faa",
     "i18n-hr.js": "ad9b6316f7571f9510787ae0d8f2dc14577450c0f1aa6b462551336ab520e5ec",
     "i18n-meeting.js": "3e3c2273f785115811db7977c991d8aa8dfb6bb74cb96f4631246731d94a7b21",
     "i18n-rehearsal.js": "19204b241a018cf4215605c7c9c67a030736a08df1eb6ecea63d9dec6cc25415",
+    "i18n-reviewed.js": "7497029c73bdace28a6c5469f55558d886230173a2fd13c0a466cdc0a6e8d787",
     "i18n.css": "448cb8d7e9e5267ee5b34426d12a07c6e0daa015e49386bebaed8fe945d749cf",
-    "i18n.js": "e1b9747e4dbbb5b4702131fa298f79eb52d827a77acc1e1cff5bae58d437a4fb",
-    "index.html": "4096486f3f7c22b95586ce6ede7368749c5ad4195ff2190e94a24d0f8072d116",
+    "i18n.js": "99a17ab249bacdda2d9042983b2c7dd181234bbfdd70f6512a72a3639d0d8e35",
+    "index.html": "f9b6ff6b92aa027a840351ef0edf8aadbcbcafd42da010caf6a6380f0320e2b9",
     "launch.command": "61850990f21a1cc99040f351ac385d32ff3f0b0e8f1a1f02d08f8764ed0c58a9",
-    "leave-applications-content.js": "510f9fc68e1b883ce122e39076b4bf193acff2f803a3f04fd5e12095cf935330",
-    "leave-rules.js": "d54463c60dc053f5e3bddf1fb771d404cc800c91cf9b00eed83ed421aea6b86a",
-    "local-attachments.js": "950d9fee2d1a72f50e501eb565290e82d58febb93238e669ce69a6ec0403cb50",
+    "leave-applications-content.js": "28d20aef2c68cab1b7d0317f0727d7608b00e8c420b57edf62193b2fe0639e15",
+    "leave-rules.js": "7b8e4dca201fab2254f8c1e8b8a8cadfae59bf78678b8ff66ae77e9eb03e8506",
+    "local-attachments.js": "68fc5ec20793958f74059590150b77c86fd9c11eabaa401a6e6d97b037a3e948",
     "management-overview.css": "3962f0e4a3dec8246f0afe67d74b190c666928d0f25c3a12ffffecd5238437e4",
-    "management-overview.js": "9869c57de81a89500870a82e09780085b133958913651d046d195b438be755fe",
-    "meeting-requests.js": "cec491d276b043038f197e048adeca586913cf3c0b47d89d348a39337a78ba30",
+    "management-overview.js": "d60e228bfac871b7be7f42708a31da9fed16b45fe9e67231853d1358c20a6406",
+    "meeting-requests.js": "295125d7b35ca177383242cfe0aac00ee836825599107dbec61c44243c226bd0",
     "mobile-shell.css": "c5a33a47b4f81cbb19bea8d6374d2a0c76cde5408407aa31702bfc1ec19afefc",
-    "mobile-shell.js": "0db369e074e5de70d1a80cfe5100777d2445bdd43de1507837dc88bedea51c12",
+    "mobile-shell.js": "caf0cdc11adc1d3c1b5bb22407a0e5a8b9f51a7aa5aaa37bea73320cb9dd3cfe",
     "mobile-tables.css": "b88250c5a74737e1a8921dca0b7b4fe8c067aeac63a741c06ab9e03366c97c6c",
     "mobile-tables.js": "d3e5d14169cc974eb9ca8b81767643dd87adeb449e8d41eaeb6784b3e2a16839",
-    "mobile.html": "20670af54bcdb4fe71cc3fa54e324eba44ebecd9f6a9f50f7784bd673b57343a",
+    "mobile.html": "13b941ebe91315fe8b3805765fb75ae335e02cfbddc0df6722b3be354f193020",
     "notifications.js": "c1f2e58befd11b57c723b36cd4fac273f75fd100af0399d536f61f66fc265c32",
     "payroll-content.js": "8d24101cf65db8c74886cf675418fdba69f1fac9396805aa6428964fcc1762bf",
-    "performance.js": "7981d81811af0273d92e684152df3ee4a2480fe0ab8e9ff27d3d86b682106f1b",
+    "performance.js": "b0cb98b1f65dde5ff2ea1813e36605ebabf8a9a672a53947392fc997f8cfbd44",
     "personnel-content.js": "65b0d4e39f90541bfafe45bce6bdea7e5a4b36d217519199df1e82163d4eb045",
     "projects.js": "009560ecab81ffdf69ea68e803287679bd9b21a9364b334b9105783def7f0241",
     "rehearsal-dates.css": "6a3bb4a54088e0e7bee8951206a3a531aaf1f56ed204824c6d3426f15634d3cf",
-    "rehearsal-dates.js": "19d1432c1d0f4d53251dd06f44365d8a798d2daf74571757d2aac9fd6ed4da7c",
+    "rehearsal-dates.js": "1c16ea487d6f847af2b06244ab3da2ca73bd819f462f7f5454f76b5f4de26f3d",
     "rehearsal-shell.css": "870ed27128aeaaa574c24387ed71d374139347dbcf50f2718f202ca9f6b459aa",
     "rehearsal-shell.js": "5b85411feebf8c611fe6cf357273cca455eeb135f6a64d784e41816f7f2778f9",
     "retained-content.js": "0049fb9a5db89d94dee5bb08f063593cc413f1bf3bc6a64e73d0c68617492c09",
@@ -192,7 +251,7 @@
     "排练操作.md": "0bd4fafa1e84e532372db58cbd2293dc85369d0c7b04a6f896870aa488264f34",
     "演示讲稿.html": "999a27b0b55093f06fcd0e910c1c98164e017afc41e1532b13729bbee87190b5",
     "演示讲稿.md": "540efbdad2c01449384d2530b0fb38089713d281d2524c5e602099ce8aaefea3",
-    "演示讲稿_高棉文.html": "f789723fe1c1322e06f5b07f4bc79bb9ecf8b4f9dd2439a4b7bef4281d4c80e5",
-    "演示讲稿_高棉文.md": "7cadc590f0c95cdda1fcc09f3a48a0616435a780a0ebe911a30db180e0240d42"
+    "演示讲稿_高棉文.html": "f3bc82de6cd8547751e005ac14af4a17e7e492c39fbf7dacfb47930896add6c4",
+    "演示讲稿_高棉文.md": "829b84195aec77b64faf1076efdbc3d6498f134fa3e72381d0230ebb7cf74a12"
   }
 }

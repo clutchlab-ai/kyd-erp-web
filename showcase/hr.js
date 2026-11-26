@@ -4,6 +4,11 @@
   const D = window.D;
   const E = value => D.esc(value ?? '');
   const TYPES = [['labor', '勞動合約'], ['passport', '護照'], ['permit', '工作許可'], ['visa', '簽證'], ['nda', '保密協議']];
+  const DEFAULT_TRANSFER_REASON = '加入工程團隊，負責圖面整理與本人工作進度回報。';
+  function markDefaultReason(record) {
+    if(record.reason===DEFAULT_TRANSFER_REASON)record._fixtureDefaults={...record._fixtureDefaults,reason:DEFAULT_TRANSFER_REASON};
+    else if(record._fixtureDefaults){delete record._fixtureDefaults.reason;if(!Object.keys(record._fixtureDefaults).length)delete record._fixtureDefaults;}
+  }
   const PROFILE = {
     administrative_assistant: {label: '行政助理', department: '行政部', title: '行政助理', own: ['自己的出勤與假勤申請', '自己的申請進度', '自己的證件與考核'], business: ['行政交辦：僅查看指派給自己的工作'], denied: ['其他員工的薪資', '工程專案', '採購與財務核准', '帳號與權限設定']},
     engineering_assistant: {label: '工程助理', department: '工程部', title: '工程助理', own: ['自己的出勤與假勤申請', '自己的申請進度', '自己的證件與考核'], business: ['工程：查看指派的專案與最新圖面', '工程：更新自己的工作進度'], denied: ['其他員工的薪資', '工程預算修改與驗收核准', '採購與財務核准', '帳號與權限設定']}
@@ -16,7 +21,7 @@
   const btn = (label, action, id, primary = false) => `<button class="btn${primary ? ' primary' : ''}" data-action="${action}" data-id="${E(id)}">${label}</button>`;
   const head = (eyebrow, title, text, actions = '') => `<header class="page-head"><div><p class="eyebrow">${eyebrow}</p><h1>${title}</h1><p class="lede">${text}</p></div>${actions ? `<div class="action-row">${actions}</div>` : ''}</header>`;
   const seed = s => {
-    if (!s.hrRequests) s.hrRequests = [{id: 'HR-001', employeeId: 'e01', company: 'SFM', kind: '部門／職務調整', fromDepartment: person('e01')?.department || '行政部', fromTitle: person('e01')?.title || '行政助理', fromProfile: 'administrative_assistant', toProfile: 'engineering_assistant', effectiveOn: D.today, reason: '加入工程團隊，負責圖面整理與本人工作進度回報。', status: 'draft', createdBy: 'h01', createdByName: '方可欣', events: [{date: D.today, actor: '方可欣', action: '建立草稿', note: '行政助理調整為工程助理。'}]}];
+    if (!s.hrRequests) s.hrRequests = [{id: 'HR-001', employeeId: 'e01', company: 'SFM', kind: '部門／職務調整', fromDepartment: person('e01')?.department || '行政部', fromTitle: person('e01')?.title || '行政助理', fromProfile: 'administrative_assistant', toProfile: 'engineering_assistant', effectiveOn: D.today, reason: DEFAULT_TRANSFER_REASON, status: 'draft', createdBy: 'h01', createdByName: '方可欣', events: [{date: D.today, actor: '方可欣', action: '建立草稿', note: '行政助理調整為工程助理。'}]}];
     // Preserve earlier saved approvals, and freeze their saved contents on upgrade.
     for(const r of s.hrRequests)if(r.status==='approved'&&!r.approvedVersion)r.approvedVersion={employeeId:r.employeeId,company:r.company,fromDepartment:r.fromDepartment,fromTitle:r.fromTitle,fromProfile:r.fromProfile,toProfile:r.toProfile,effectiveOn:r.effectiveOn,reason:r.reason};
     if (!s.hrDocuments) {
@@ -123,13 +128,13 @@
     if (r && (!canSeeRequest(r) || !['draft','returned'].includes(r.status))) {D.toast('送審中的內容不能直接修改。');return;}
     if (D.state.company !== 'SFM') {D.toast('此員工任職公司為 SFM，請確認公司範圍。');return;}
     const p = person('e01'),openingActor=D.actor.id,openingCompany=D.company,openingState=r?JSON.stringify(r):'';
-    D.modal(r?'填寫職務調整申請':'新增職務調整申請', `<div class="notice blue">員工：${E(p?.name || '沈亦凡')}（SFM） · ${E(p?.department)}／${E(p?.title)}。</div><div class="form-grid"><label class="field full">新部門／職務${D.select('toProfile',Object.entries(PROFILE).map(([key,v])=>[key,`${v.department}・${v.title}`]),r?.toProfile || 'engineering_assistant')}</label><label class="field">生效日期<input name="effectiveOn" type="date" required value="${E(r?.effectiveOn || D.today)}"></label><label class="field full">異動原因<textarea name="reason" required maxlength="500" rows="3">${E(r?.reason || '加入工程團隊，負責圖面整理與本人工作進度回報。')}</textarea></label></div>`, values => {
+    D.modal(r?'填寫職務調整申請':'新增職務調整申請', `<div class="notice blue">員工：${E(p?.name || '沈亦凡')}（SFM） · ${E(p?.department)}／${E(p?.title)}。</div><div class="form-grid"><label class="field full">新部門／職務${D.select('toProfile',Object.entries(PROFILE).map(([key,v])=>[key,`${v.department}・${v.title}`]),r?.toProfile || 'engineering_assistant')}</label><label class="field">生效日期<input name="effectiveOn" type="date" required value="${E(r?.effectiveOn || D.today)}"></label><label class="field full">異動原因<textarea name="reason" required maxlength="500" rows="3">${E(r?.reason || DEFAULT_TRANSFER_REASON)}</textarea></label></div>`, values => {
       if(!hrCanEdit()||D.actor.id!==openingActor||D.company!==openingCompany||r&&(!canSeeRequest(r)||!['draft','returned'].includes(r.status)||JSON.stringify(r)!==openingState))throw new Error('身分、公司或申請狀態已改變，請重新開啟。');
       if (!PROFILE[values.toProfile] || !validDate(values.effectiveOn) || !values.reason.trim()) throw new Error('請填寫完整的職務、生效日與原因。');
-      if (r) {r.toProfile=values.toProfile;r.effectiveOn=values.effectiveOn;r.reason=values.reason.trim();logEvent(r,'儲存異動草稿','');}
+      if (r) {r.toProfile=values.toProfile;r.effectiveOn=values.effectiveOn;r.reason=values.reason.trim();markDefaultReason(r);logEvent(r,'儲存異動草稿','');}
       else {
         const item = {id:`HR-${String(D.state.hrRequests.length+1).padStart(3,'0')}`,employeeId:'e01',company:'SFM',kind:'部門／職務調整',fromDepartment:p.department,fromTitle:p.title,fromProfile:p.profile==='engineering_assistant'?'engineering_assistant':'administrative_assistant',toProfile:values.toProfile,effectiveOn:values.effectiveOn,reason:values.reason.trim(),status:'draft',createdBy:D.actor.id,createdByName:D.actor.name,events:[]};
-        D.state.hrRequests.unshift(item); logEvent(item,'建立異動草稿',''); D.save(); D.go('personnel',{id:item.id}); return;
+        markDefaultReason(item); D.state.hrRequests.unshift(item); logEvent(item,'建立異動草稿',''); D.save(); D.go('personnel',{id:item.id}); return;
       }
       D.save();D.render();D.go('personnel',{id:r.id});D.toast('申請已儲存，接著可送交主管複核。');
     }, '儲存草稿');
@@ -137,7 +142,7 @@
   function confirmTransition(action,id) {
     const r=request(id); if (!canSeeRequest(r)) {D.toast('無法開啟這筆異動。');return;}
     const labels={submit:'送交人資主管複核',review:'複核通過',approve:'核准異動',apply:'確認異動生效',return:'退回人資補充',reopen:'重新送審'};
-    const body = action==='apply' ? `${impact(r)}<p><strong>確認後：</strong>${E(person(r.employeeId)?.name)} 會改為 ${E(profile(r.toProfile).title)}。</p>` : `<p>${E(person(r.employeeId)?.name)}：${E(r.fromTitle)} → <strong>${E(profile(r.toProfile).title)}</strong></p><p class="muted">${action==='approve'?'核准後狀態為待生效。':action==='return'?'請填寫退回原因。':''}</p>`;
+    const body = action==='apply' ? `${impact(r)}<p><strong>確認後：</strong>${E(person(r.employeeId)?.name)} 會改為 ${E(profile(r.toProfile).title)}。</p>` : `<p><span data-i18n-value>${E(person(r.employeeId)?.name)}</span>：<span data-i18n-ui>${E(r.fromTitle)}</span> → <strong data-i18n-ui>${E(profile(r.toProfile).title)}</strong></p><p class="muted">${action==='approve'?'核准後狀態為待生效。':action==='return'?'請填寫退回原因。':''}</p>`;
     const mustExplain=['return','reopen'].includes(action);
     D.modal(labels[action], body+(action==='reopen'?'<p class="notice">原核准會失效，修改後須重新複核與核准；生效前不變更員工資料。</p>':'')+`<label class="field full">${action==='reopen'?'重新送審原因':action==='return'?'退回原因（必填）':'處理備註（選填）'}<textarea name="note" rows="3" maxlength="500" ${mustExplain?'required':''}></textarea></label>`, values => {transition(id,action,values.note||'');D.render();D.toast(action==='apply'?'異動已生效。':'已完成處理。');},labels[action]);
   }

@@ -57,7 +57,7 @@
   if(!D.mobileActive)return oldHome.apply(this,args);
   if(D.managementOverview&&['ceo','chairman','admin'].includes(D.role)){
    if(['management','chairman','deng'].includes(args[0]?.dashboard))return oldHome.apply(this,args);
-   return (['ceo','chairman'].includes(D.role)?D.managementOverview.executiveNavigation():'<div class="action-row"><a class="btn" href="#view=home&dashboard=management">管理總覽</a><a class="btn" href="#view=home&dashboard=chairman">董事長專屬 Dashboard</a></div>')+phoneHome();
+   return (['ceo','chairman'].includes(D.role)?D.managementOverview.executiveNavigation():'<div class="action-row"><a class="btn" href="#view=home&dashboard=management">管理總覽</a><a class="btn" href="#view=home&dashboard=chairman">董事長總覽</a></div>')+phoneHome();
   }
   return phoneHome();
  };

@@ -13,10 +13,12 @@
  const validMonth=s=>/^\d{4}-(0[1-9]|1[0-2])$/.test(s||'');
  const monthIndex=s=>Number(s.slice(0,4))*12+Number(s.slice(5,7))-1;
  const round=n=>Math.round((n+Number.EPSILON)*100)/100;
+ const DEFAULT_POLICY_NOTE='示例：每月 1.5 天、每日 8 小時；正式起算、結轉及計薪規則待核定。';
+ function markDefaultPolicyNote(policy){if(policy.note===DEFAULT_POLICY_NOTE)policy._fixtureDefaults={...policy._fixtureDefaults,note:DEFAULT_POLICY_NOTE};else if(policy._fixtureDefaults){delete policy._fixtureDefaults.note;if(!Object.keys(policy._fixtureDefaults).length)delete policy._fixtureDefaults;}}
  function seed(s){
   s.leaveRuleSettings??={version:1,policies:{},routes:[],accounts:{},adjustments:[],customTypes:[],history:[]};
   const st=s.leaveRuleSettings;
-  for(const c of ['SFM','SMC'])st.policies[c]??={monthlyDays:1.5,hoursPerDay:8,accruedThrough:D.dateAdd(D.today.slice(0,7)+'-01',-1).slice(0,7),reservePending:true,note:'示例：每月 1.5 天、每日 8 小時；正式起算、結轉及計薪規則待核定。'};
+  for(const c of ['SFM','SMC'])st.policies[c]??={monthlyDays:1.5,hoursPerDay:8,accruedThrough:D.dateAdd(D.today.slice(0,7)+'-01',-1).slice(0,7),reservePending:true,note:DEFAULT_POLICY_NOTE};
   for(const p of s.people)st.accounts[p.company+':'+p.id]??={startMonth:D.today.slice(0,4)+'-01',openingHours:0};
   for(const t of st.customTypes)types[t.id]=t.name;
  }
@@ -153,7 +155,7 @@
   if(!Number.isFinite(monthlyDays)||monthlyDays<0||monthlyDays>31||!Number.isFinite(hoursPerDay)||hoursPerDay<=0||hoursPerDay>24||!validMonth(v.accruedThrough)||v.accruedThrough>D.today.slice(0,7))throw Error('請核對累計天數、每日時數及計算截止月份。');
   if(!String(v.note||'').trim())throw Error('請填寫設定依據。');
   for(const p of D.state.people.filter(p=>p.company===D.company)){const b=balance(p.id,D.company),a=store().accounts[D.company+':'+p.id],months=Math.max(0,monthIndex(v.accruedThrough)-monthIndex(a.startMonth)+1);if(round(b.opening+months*monthlyDays*hoursPerDay+b.adjustment-b.used-(v.reservePending!=='no'?b.pending:0))<0)throw Error('新規則會使員工可用額度為負數，請先核對申請與額度。');}
-  D.mutate(()=>{const old=store().policies[D.company];store().history.push({at:D.today,actor:D.actor.id,company:D.company,action:'更新年假規則',before:structuredClone(old)});Object.assign(old,{monthlyDays,hoursPerDay,accruedThrough:v.accruedThrough,reservePending:v.reservePending!=='no',note:v.note.trim()});D.log('更新年假示例計算規則');});
+  D.mutate(()=>{const old=store().policies[D.company];markDefaultPolicyNote(old);store().history.push({at:D.today,actor:D.actor.id,company:D.company,action:'更新年假規則',before:structuredClone(old)});Object.assign(old,{monthlyDays,hoursPerDay,accruedThrough:v.accruedThrough,reservePending:v.reservePending!=='no',note:v.note.trim()});markDefaultPolicyNote(old);D.log('更新年假示例計算規則');});
  }
  function adjust(v){
   if(!editors()||!inCompany(D.company)||!person(v.employeeId)||person(v.employeeId).company!==D.company)throw Error('只能調整本公司的員工額度。');
